@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ActionOn Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | actionOn</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">actionOn</span>. This plugin binds actions (<span class="ui-mono">open</span>, <span class="ui-mono">close</span>, <span class="ui-mono">unmount</span>, <span class="ui-mono">destroy</span>) to DOM events by <span class="ui-mono">role/event/selector</span>.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">ActionOn Instances</h2>
+      <p class="ui-section-subtitle">Each card opens one validation scenario of the <span class="ui-mono">actionOn</span> plugin and shows the exact bound rules in a code window. Use this as a focused checklist for close paths, selector delegation, invalid-rule fallback, stress behavior, stack interaction, and recreate safety.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllAction" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm">
+        <article class="ui-card">
+          <button id="openInstanceCustom" class="ui-btn ui-btn-tech ui-btn-block-start">Custom default</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeCustom">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeCustom" />
+          <div class="ui-code-wrap"><pre id="preActionCodeCustom" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT1" class="ui-btn ui-btn-tech ui-btn-block-start">T1 disabled</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT1">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT1" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT1" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT2" class="ui-btn ui-btn-tech ui-btn-block-start">T2 default</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT2">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT2" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT2" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT3" class="ui-btn ui-btn-tech ui-btn-block-start">T3 selector</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT3">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT3" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT3" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT4" class="ui-btn ui-btn-tech ui-btn-block-start">T4 rwd variants</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT4">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT4" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT4" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT5" class="ui-btn ui-btn-tech ui-btn-block-start">T5 full stack</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT5">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT5" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT5" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT6" class="ui-btn ui-btn-tech ui-btn-block-start">T6 reentry</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT6">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT6" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT6" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT7" class="ui-btn ui-btn-tech ui-btn-block-start">T7 dual stack</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT7">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT7" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT7" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT8" class="ui-btn ui-btn-tech ui-btn-block-start">T8 destroy/recreate</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT8">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT8" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT8" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT9" class="ui-btn ui-btn-tech ui-btn-block-start">T9 invalid do</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT9">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT9" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT9" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT10" class="ui-btn ui-btn-tech ui-btn-block-start">T10 missing on</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT10">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT10" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT10" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT11" class="ui-btn ui-btn-tech ui-btn-block-start">T11 trigger shape</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT11">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT11" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT11" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT12" class="ui-btn ui-btn-tech ui-btn-block-start">T12 field types</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT12">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT12" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT12" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT13" class="ui-btn ui-btn-tech ui-btn-block-start">T13 missing ref</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT13">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT13" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT13" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT14" class="ui-btn ui-btn-tech ui-btn-block-start">T14 no handlers</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT14">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT14" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT14" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT15" class="ui-btn ui-btn-tech ui-btn-block-start">T15 invalid rules</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionCodeT15">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionCodeT15" />
+          <div class="ui-code-wrap"><pre id="preActionCodeT15" class="ui-code ui-mono"></pre></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    let customDefault;
+    let t1;
+    let t2;
+    let t3;
+    let t4;
+    let t5;
+    let t6;
+    let t7a;
+    let t7b;
+    let t8;
+    let t9;
+    let t10;
+    let t11;
+    let t12;
+    let t13;
+    let t14;
+    let t15;
+    let t8SettingsForRecreate;
+    let t8ContentForRecreate;
+
+    const actionOnSourceById = {};
+
+    async function createTechModals() {
+      const customSettings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+          },
+        },
+      };
+      customDefault = await Modal.create(customSettings);
+      customDefault.setContent("<h3 class=\"ui-content-title\">ActionOn custom default</h3><ul class=\"ui-content-list\"><li>Goal: baseline behavior using the default <span class=\"ui-mono\">actionOn</span> contract.</li><li>What is bound: close action on <span class=\"ui-mono\">backdrop:click</span> and <span class=\"ui-mono\">close:click</span>.</li><li>Expected flow: modal opens normally, both default close paths work, no extra side effects.</li><li>Regression signal: click works once but not after reopen, or closes from unintended elements.</li></ul>");
+      actionOnSourceById.Custom = customSettings;
+
+      const t1Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: false,
+            rules: [],
+          },
+          closeButton: {
+            enabled: true,
+          },
+          backdrop: {
+            enabled: true,
+          },
+        },
+      };
+      t1 = await Modal.create(t1Settings);
+      t1.setContent("<h3 class=\"ui-content-title\">ActionOn T1: disabled plugin</h3><ul class=\"ui-content-list\"><li>Goal: confirm behavior when <span class=\"ui-mono\">actionOn</span> is disabled.</li><li>Scenario: close button and backdrop are rendered, but no actionOn rules are active.</li><li>Expected flow: backdrop and close button clicks do not close this modal.</li><li>Regression signal: modal closes despite plugin disabled, meaning another handler is leaking in.</li></ul>");
+      actionOnSourceById.T1 = t1Settings;
+
+      const t2Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+          },
+        },
+      };
+      t2 = await Modal.create(t2Settings);
+      t2.setContent("<h3 class=\"ui-content-title\">ActionOn T2: default actionOn</h3><ul class=\"ui-content-list\"><li>Goal: validate default rules from <span class=\"ui-mono\">modal/defaults.js</span>.</li><li>What is bound: close action on standard backdrop and close control roles.</li><li>Expected flow: both close paths work consistently on every reopen.</li><li>Regression signal: one path works and the other does not, or behavior changes after reopen.</li></ul>");
+      actionOnSourceById.T2 = t2Settings;
+
+      const t3Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          footer: {
+            enabled: true,
+          },
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["panel", "click", "[data-aon-close]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: false,
+            rules: [],
+          },
+        },
+      };
+      t3 = await Modal.create(t3Settings);
+      t3.setContent("<h3 class=\"ui-content-title\">ActionOn T3: selector delegation</h3><ul class=\"ui-content-list\"><li>Goal: verify delegated selector trigger inside panel scope.</li><li>Rule: close only from <span class=\"ui-mono\">panel:click</span> when target matches <span class=\"ui-mono\">[data-aon-close]</span>.</li><li>Expected flow: only the marked button closes; random panel clicks stay inert.</li><li>Regression signal: panel closes on non-matching clicks or selector trigger is ignored.</li></ul><div class=\"ui-mt-sm\"><button type=\"button\" class=\"ui-btn ui-btn-tech\" data-aon-close>Close via selector</button></div>");
+      actionOnSourceById.T3 = t3Settings;
+
+      const t4Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOn T4 | desktop",
+              interval: 900,
+            },
+          },
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-aon-rwd-close]"],
+                ],
+              },
+            ],
+          },
+        },
+        rwd: {
+          "(max-width: 767px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOn T4 | mobile <=767 | close only",
+                  interval: 700,
+                },
+              },
+              actionOn: {
+                enabled: true,
+                rules: [
+                  {
+                    do: "close",
+                    on: [
+                      ["close", "click"],
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          "(min-width: 768px) and (max-width: 1023px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOn T4 | tablet 768-1023 | backdrop+close",
+                  interval: 800,
+                },
+              },
+              actionOn: {
+                enabled: true,
+                rules: [
+                  {
+                    do: "close",
+                    on: [
+                      ["backdrop", "click"],
+                      ["close", "click"],
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          "(min-width: 1024px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOn T4 | desktop >=1024 | backdrop+close+selector",
+                  interval: 900,
+                },
+              },
+            },
+          },
+        },
+      };
+      t4 = await Modal.create(t4Settings);
+      t4.setContent("<h3 class=\"ui-content-title\">ActionOn T4: RWD variants</h3><ul class=\"ui-content-list\"><li>Goal: verify that <span class=\"ui-mono\">actionOn</span> rules are correctly swapped by breakpoint.</li><li><span class=\"ui-mono\">mobile &lt;=767</span>: close only by role <span class=\"ui-mono\">close</span>.</li><li><span class=\"ui-mono\">tablet 768-1023</span>: close by <span class=\"ui-mono\">backdrop</span> and <span class=\"ui-mono\">close</span>.</li><li><span class=\"ui-mono\">desktop &gt;=1024</span>: close by <span class=\"ui-mono\">backdrop</span>, <span class=\"ui-mono\">close</span>, and delegated selector.</li><li>Expected flow: each viewport applies only its own rule set without leak from other breakpoints.</li></ul><div class=\"ui-mt-sm\"><button type=\"button\" class=\"ui-btn ui-btn-tech\" data-aon-rwd-close>Desktop selector close</button></div>");
+      actionOnSourceById.T4 = t4Settings;
+
+      const t5Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-aon-close]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape", "Esc"],
+                when: "open",
+              },
+            ],
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOn T5 active",
+              interval: 1000,
+            },
+          },
+        },
+      };
+      t5 = await Modal.create(t5Settings);
+      t5.setContent("<h3 class=\"ui-content-title\">ActionOn T5: full stack</h3><ul class=\"ui-content-list\"><li>Goal: validate <span class=\"ui-mono\">actionOn</span> interoperability with other enabled plugins.</li><li>Stack: actionOn + actionOnKey + focusTrap + lockScroll + titleBlinkOnAway.</li><li>Expected flow: close behavior is consistent from backdrop, close button, selector, and ESC.</li><li>Regression signal: one close path bypasses state cleanup or conflicts appear between plugins.</li></ul><div class=\"ui-mt-sm\"><button type=\"button\" class=\"ui-btn ui-btn-tech\" data-aon-close>Close via selector</button></div>");
+      actionOnSourceById.T5 = t5Settings;
+
+      const t6Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-aon-close]"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t6 = await Modal.create(t6Settings);
+      t6.setContent("<h3 class=\"ui-content-title\">ActionOn T6: reentry stress</h3><ul class=\"ui-content-list\"><li>Goal: detect duplicated listeners or stale cleanup on rapid reuse.</li><li>Scenario: same instance opens/closes repeatedly in quick cadence.</li><li>Expected flow: no event multiplication, no freeze, and close still fires exactly once per trigger.</li><li>Regression signal: multiple closes per click, delayed reactions, or detached controls.</li></ul><div class=\"ui-mt-sm\"><button type=\"button\" class=\"ui-btn ui-btn-tech\" data-aon-close>Close via selector</button></div>");
+      actionOnSourceById.T6 = t6Settings;
+
+      const t7Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t7a = await Modal.create(t7Settings);
+      t7a.setContent("<h3 class=\"ui-content-title\">ActionOn T7A</h3><ul class=\"ui-content-list\"><li>Goal: base layer in two-modal stack validation.</li><li>Expected flow: stays functional before and after top modal appears.</li><li>Checks: no accidental close from top modal controls, no handler cross-talk.</li></ul>");
+
+      t7b = await Modal.create(t7Settings);
+      t7b.setContent("<h3 class=\"ui-content-title\">ActionOn T7B</h3><ul class=\"ui-content-list\"><li>Goal: top layer in stack opened with delay over T7A.</li><li>Expected flow: each modal keeps isolated handlers and closes independently.</li><li>Regression signal: wrong instance reacts to click, or closing top breaks bottom handlers.</li></ul>");
+      actionOnSourceById.T7 = t7Settings;
+
+      const t8Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape", "Esc"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t8SettingsForRecreate = t8Settings;
+      t8ContentForRecreate = "<h3 class=\"ui-content-title\">ActionOn T8: destroy during run</h3><ul class=\"ui-content-list\"><li>Goal: verify lifecycle safety under forced destroy/recreate.</li><li>Scenario: open modal, destroy instance shortly after, then create a fresh one with identical rules.</li><li>Expected flow: no runtime errors, no stale listener leaks, recreated instance behaves exactly like the original.</li><li>Regression signal: duplicated handlers, broken close behavior after recreate, or console exceptions.</li></ul>";
+      t8 = await Modal.create(t8Settings);
+      t8.setContent(t8ContentForRecreate);
+      actionOnSourceById.T8 = t8Settings;
+
+      const t9Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "boom",
+                on: [
+                  ["backdrop", "click"],
+                ],
+              },
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t9 = await Modal.create(t9Settings);
+      t9.setContent("<h3 class=\"ui-content-title\">ActionOn T9: invalid <span class=\"ui-mono\">do</span></h3><ul class=\"ui-content-list\"><li>Goal: validate guard for unsupported action names.</li><li>Scenario: first rule uses invalid <span class=\"ui-mono\">do: boom</span>, second rule is valid close fallback.</li><li>Expected flow: invalid rule is ignored; valid close handlers stay active.</li><li>Regression signal: modal crashes on mount or valid close path stops working.</li></ul>");
+      actionOnSourceById.T9 = t9Settings;
+
+      const t10Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+              },
+              {
+                do: "close",
+                on: [],
+              },
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t10 = await Modal.create(t10Settings);
+      t10.setContent("<h3 class=\"ui-content-title\">ActionOn T10: missing <span class=\"ui-mono\">on</span></h3><ul class=\"ui-content-list\"><li>Goal: verify behavior when trigger arrays are missing or empty.</li><li>Scenario: rules contain <span class=\"ui-mono\">on</span> omitted/empty, plus one valid rule.</li><li>Expected flow: invalid rules are skipped and valid close still works.</li><li>Regression signal: parser aborts all binding or throws runtime error.</li></ul>");
+      actionOnSourceById.T10 = t10Settings;
+
+      const t11Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  123,
+                  ["backdrop"],
+                  ["backdrop", "click", "[data-aon-close]", "extra"],
+                  ["backdrop", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t11 = await Modal.create(t11Settings);
+      t11.setContent("<h3 class=\"ui-content-title\">ActionOn T11: invalid trigger shape</h3><ul class=\"ui-content-list\"><li>Goal: validate trigger-structure checks.</li><li>Scenario: includes non-array trigger and wrong tuple lengths mixed with one valid tuple.</li><li>Expected flow: malformed triggers are ignored, valid trigger binds and closes modal.</li><li>Regression signal: malformed tuple breaks plugin mount or blocks valid trigger.</li></ul>");
+      actionOnSourceById.T11 = t11Settings;
+
+      const t12Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  [null, "click"],
+                  ["panel", 123],
+                  ["panel", "click", 42],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t12 = await Modal.create(t12Settings);
+      t12.setContent("<h3 class=\"ui-content-title\">ActionOn T12: invalid field types</h3><ul class=\"ui-content-list\"><li>Goal: verify strict type checks for <span class=\"ui-mono\">role/event/selector</span>.</li><li>Scenario: invalid field types are mixed with one valid close tuple.</li><li>Expected flow: only valid tuple is bound; invalid entries are ignored safely.</li><li>Regression signal: click closes from wrong places or plugin emits runtime exceptions.</li></ul>");
+      actionOnSourceById.T12 = t12Settings;
+
+      const t13Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["missingRole", "click"],
+                  ["backdrop", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t13 = await Modal.create(t13Settings);
+      t13.setContent("<h3 class=\"ui-content-title\">ActionOn T13: missing ref</h3><ul class=\"ui-content-list\"><li>Goal: test behavior when role points to nonexistent ref in modal internals.</li><li>Scenario: one trigger targets missing role; second trigger is valid backdrop close.</li><li>Expected flow: missing ref is skipped without crash; valid trigger still works.</li><li>Regression signal: plugin fails mount entirely or valid fallback does not bind.</li></ul>");
+      actionOnSourceById.T13 = t13Settings;
+
+      const t14Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              null,
+              {},
+              {
+                do: "boom",
+                on: [
+                  ["missingRole", "click"],
+                ],
+              },
+              {
+                do: "close",
+                on: [
+                  ["panel", 123],
+                  ["panel", "click", 42],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: false,
+            rules: [],
+          },
+          closeButton: {
+            enabled: true,
+          },
+          backdrop: {
+            enabled: true,
+          },
+        },
+      };
+      t14 = await Modal.create(t14Settings);
+      t14.setContent("<h3 class=\"ui-content-title\">ActionOn T14: no handlers bound</h3><ul class=\"ui-content-list\"><li>Goal: force the plugin path where no valid handlers are mounted.</li><li>Scenario: all rules are malformed or unbindable; no valid <span class=\"ui-mono\">actionOn</span> trigger remains.</li><li>Expected flow: modal does not close from backdrop/close control in this scenario.</li><li>Regression signal: modal still reacts to invalid triggers or plugin crashes on mount.</li></ul>");
+      actionOnSourceById.T14 = t14Settings;
+
+      const t15Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              null,
+              {},
+              {
+                do: "boom",
+                on: [
+                  ["backdrop", "click"],
+                ],
+              },
+              {
+                do: "close",
+                on: [
+                  ["missingRole", "click"],
+                  ["panel", 123],
+                  ["panel", "click", 42],
+                  ["backdrop", "click"],
+                ],
+              },
+            ],
+          },
+        },
+      };
+      t15 = await Modal.create(t15Settings);
+      t15.setContent("<h3 class=\"ui-content-title\">ActionOn T15: invalid rules fallback</h3><ul class=\"ui-content-list\"><li>Goal: harden parser behavior against malformed rules.</li><li>Scenario: config includes invalid role/event/selector entries mixed with one valid rule.</li><li>Expected flow: invalid entries are safely ignored; valid backdrop close remains active.</li><li>Regression signal: modal crashes, no handler binds at all, or invalid rule unexpectedly executes.</li></ul>");
+      actionOnSourceById.T15 = t15Settings;
+    }
+
+    await createTechModals();
+    const modals = [t1, t2, t3, t4, t5, t6, t7a, t8, t9, t10, t11, t12, t13, t14, t15];
+    const cards = [
+      { id: "Custom", modal: customDefault },
+      { id: "T1", modal: t1 },
+      { id: "T2", modal: t2 },
+      { id: "T3", modal: t3 },
+      { id: "T4", modal: t4 },
+      { id: "T5", modal: t5 },
+      { id: "T6", modal: t6 },
+      { id: "T7", modal: t7a },
+      { id: "T8", modal: t8 },
+      { id: "T9", modal: t9 },
+      { id: "T10", modal: t10 },
+      { id: "T11", modal: t11 },
+      { id: "T12", modal: t12 },
+      { id: "T13", modal: t13 },
+      { id: "T14", modal: t14 },
+      { id: "T15", modal: t15 },
+    ];
+
+    document.getElementById("closeAllAction")?.addEventListener("click", () => {
+      for (const modal of [customDefault, ...modals, t7b]) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    });
+
+    for (let i = 0; i < cards.length; i++) {
+      const { id, modal } = cards[i];
+      const openButton = document.getElementById(`openInstance${id}`);
+      const preCode = document.getElementById(`preActionCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (openButton) {
+        openButton.addEventListener("click", async () => {
+          if (id === "T6") {
+            let ticks = 0;
+            const timer = setInterval(() => {
+              if (ticks % 2 === 0) t6.open();
+              else t6.close();
+              ticks += 1;
+              if (ticks >= 10) clearInterval(timer);
+            }, 90);
+            return;
+          }
+
+          if (id === "T7") {
+            t7a.open();
+            setTimeout(() => t7b.open(), 260);
+            return;
+          }
+
+          if (id === "T8") {
+            await t8.open();
+            setTimeout(async () => {
+              try {
+                t8.destroy();
+              } catch {}
+              t8 = await Modal.create(t8SettingsForRecreate);
+              t8.setContent(t8ContentForRecreate);
+              if (preCode) {
+                preCode.textContent = JSON.stringify(actionOnSourceById.T8 ?? {}, null, 2);
+              }
+              window.__modalsActionOn.t8 = t8;
+            }, 140);
+            return;
+          }
+
+          modal.open();
+        });
+      }
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(actionOnSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.className = "ui-btn-mini";
+        copyButton.textContent = "Copy code";
+        copyButton.addEventListener("click", async () => {
+          const text = preCode.textContent ?? "";
+          if (!text.trim()) return;
+          try {
+            await navigator.clipboard.writeText(text);
+            copyButton.textContent = "Copied";
+          } catch {
+            copyButton.textContent = "Copy error";
+          }
+          setTimeout(() => {
+            copyButton.textContent = "Copy code";
+          }, 1200);
+        });
+        tools.prepend(copyButton);
+      }
+    }
+
+    window.__modalsActionOn = { customDefault, t1, t2, t3, t4, t5, t6, t7a, t7b, t8, t9, t10, t11, t12, t13, t14, t15 };
+  </script>
+</body>
+</html>
+

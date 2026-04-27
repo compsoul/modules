@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ActionOnEvent Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | actionOnEvent</h1>
+      <p class="ui-muted">Technical validation scenarios for <span class="ui-mono">actionOnEvent</span>. This plugin subscribes actions (<span class="ui-mono">open</span>, <span class="ui-mono">close</span>, <span class="ui-mono">unmount</span>, <span class="ui-mono">destroy</span>) to modal lifecycle events with optional <span class="ui-mono">when</span> gating and <span class="ui-mono">microtask</span> scheduling.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">ActionOnEvent Instances</h2>
+      <p class="ui-section-subtitle">Each card opens one scenario and shows the exact <span class="ui-mono">actionOnEvent</span> rules. Use this to verify happy-path behavior, gating by modal state, microtask timing, invalid-rule fallback, and lifecycle safety under stress and recreate flows.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllActionOnEvent" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+
+      <div id="instancesGrid" class="ui-grid ui-mt-sm">
+        <article class="ui-card">
+          <button id="openInstanceCustom" class="ui-btn ui-btn-tech ui-btn-block-start">Custom default</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeCustom">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeCustom" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeCustom" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT1" class="ui-btn ui-btn-tech ui-btn-block-start">T1 disabled</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT1">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT1" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT1" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT2" class="ui-btn ui-btn-tech ui-btn-block-start">T2 no rules</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT2">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT2" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT2" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT3" class="ui-btn ui-btn-tech ui-btn-block-start">T3 close after open</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT3">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT3" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT3" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT4" class="ui-btn ui-btn-tech ui-btn-block-start">T4 rwd variants</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT4">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT4" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT4" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT5" class="ui-btn ui-btn-tech ui-btn-block-start">T5 microtask off</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT5">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT5" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT5" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT6" class="ui-btn ui-btn-tech ui-btn-block-start">T6 reentry stress</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT6">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT6" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT6" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT7" class="ui-btn ui-btn-tech ui-btn-block-start">T7 dual stack</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT7">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT7" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT7" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT8" class="ui-btn ui-btn-tech ui-btn-block-start">T8 destroy/recreate</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT8">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT8" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT8" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT9" class="ui-btn ui-btn-tech ui-btn-block-start">T9 invalid do</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT9">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT9" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT9" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT10" class="ui-btn ui-btn-tech ui-btn-block-start">T10 missing event</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT10">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT10" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT10" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT11" class="ui-btn ui-btn-tech ui-btn-block-start">T11 invalid config</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT11">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT11" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT11" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT12" class="ui-btn ui-btn-tech ui-btn-block-start">T12 no handlers</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT12">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT12" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT12" class="ui-code ui-mono"></pre></div>
+        </article>
+
+        <article class="ui-card">
+          <button id="openInstanceT13" class="ui-btn ui-btn-tech ui-btn-block-start">T13 when mismatch</button>
+          <div class="ui-card-tools"><label class="ui-btn-mini" for="showActionOnEventCodeT13">Show code</label></div>
+          <input type="checkbox" class="ui-toggle" id="showActionOnEventCodeT13" />
+          <div class="ui-code-wrap"><pre id="preActionOnEventCodeT13" class="ui-code ui-mono"></pre></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const customDefault = await Modal.create({
+      config: { target: document.body },
+      features: {
+        actionOnEvent: {
+          enabled: true,
+          rules: [{ do: "close", event: ["after:open"], when: "open" }],
+        },
+      },
+    });
+    customDefault.setContent("<h3 class=\"ui-content-title\">ActionOnEvent custom default</h3><ul class=\"ui-content-list\"><li>Goal: baseline valid actionOnEvent contract.</li><li>Rule: on <span class=\"ui-mono\">after:open</span> and <span class=\"ui-mono\">when: open</span> run <span class=\"ui-mono\">close</span>.</li><li>Expected: modal opens, then closes automatically via event-driven action.</li><li>Regression signal: no reaction to event or unexpected runtime error.</li></ul>");
+
+    let t1;
+    let t2;
+    let t3;
+    let t4;
+    let t5;
+    let t6;
+    let t7a;
+    let t7b;
+    let t8;
+    let t9;
+    let t10;
+    let t11;
+    let t12;
+    let t13;
+
+    async function createT8Modal() {
+      const modal = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open" }],
+          },
+        },
+      });
+
+      modal.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T8: destroy during run</h3><ul class=\"ui-content-list\"><li>Goal: verify destroy/recreate safety when handlers are event-subscribed.</li><li>Scenario: open instance, destroy shortly after, recreate with same rules.</li><li>Expected: no stale subscriptions and recreated instance behaves the same.</li><li>Regression signal: duplicated reactions, missing reactions, or runtime exceptions.</li></ul>");
+      return modal;
+    }
+
+    async function createTechModals() {
+      t1 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: { enabled: false, rules: [] },
+        },
+      });
+      t1.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T1: disabled plugin</h3><ul class=\"ui-content-list\"><li>Goal: confirm no actionOnEvent behavior when plugin is disabled.</li><li>Expected: modal lifecycle proceeds without event-driven actions from this plugin.</li><li>Regression signal: actionOnEvent-like reactions still happen while disabled.</li></ul>");
+
+      t2 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: { enabled: true, rules: [] },
+        },
+      });
+      t2.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T2: enabled with no rules</h3><ul class=\"ui-content-list\"><li>Goal: validate empty-rules fallback.</li><li>Expected: plugin exits safely with no handlers bound and no runtime error.</li><li>Regression signal: crash or phantom actions despite zero rules.</li></ul>");
+
+      t3 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open" }],
+          },
+        },
+      });
+      t3.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T3: close after open</h3><ul class=\"ui-content-list\"><li>Goal: validate canonical event-driven close path.</li><li>Rule: <span class=\"ui-mono\">after:open -> close</span> with <span class=\"ui-mono\">when: open</span>.</li><li>Expected: open transition completes, then close is triggered by event.</li><li>Regression signal: event ignored or close executed in wrong state.</li></ul>");
+
+      t4 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOnEvent T4 | desktop >=1024",
+              interval: 900,
+            },
+          },
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open" }],
+          },
+        },
+        rwd: {
+          "(max-width: 767px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOnEvent T4 | mobile <=767 | event open",
+                  interval: 700,
+                },
+              },
+              actionOnEvent: {
+                enabled: true,
+                rules: [{ do: "close", event: ["open"], when: "open" }],
+              },
+            },
+          },
+          "(min-width: 768px) and (max-width: 1023px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOnEvent T4 | tablet 768-1023 | after:open sync",
+                  interval: 800,
+                },
+              },
+              actionOnEvent: {
+                enabled: true,
+                rules: [{ do: "close", event: ["after:open"], when: "open", microtask: false }],
+              },
+            },
+          },
+          "(min-width: 1024px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOnEvent T4 | desktop >=1024 | after:open microtask",
+                  interval: 900,
+                },
+              },
+            },
+          },
+        },
+      });
+      t4.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T4: RWD variants</h3><ul class=\"ui-content-list\"><li>Goal: verify that <span class=\"ui-mono\">actionOnEvent</span> rules switch by breakpoint.</li><li><span class=\"ui-mono\">mobile &lt;=767</span>: <span class=\"ui-mono\">open -> close</span> with <span class=\"ui-mono\">when: open</span>.</li><li><span class=\"ui-mono\">tablet 768-1023</span>: <span class=\"ui-mono\">after:open -> close</span> with <span class=\"ui-mono\">microtask: false</span>.</li><li><span class=\"ui-mono\">desktop &gt;=1024</span>: <span class=\"ui-mono\">after:open -> close</span> with default microtask.</li><li>Expected: each viewport applies only its own rule set and title blink variant.</li></ul>");
+
+      t5 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open", microtask: false }],
+          },
+        },
+      });
+      t5.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T5: microtask off</h3><ul class=\"ui-content-list\"><li>Goal: compare immediate execution vs queued microtask.</li><li>Rule: <span class=\"ui-mono\">microtask: false</span> executes action synchronously in event callback.</li><li>Expected: behavior remains stable and deterministic without queued commit.</li><li>Regression signal: ordering glitches or reentrancy issues.</li></ul>");
+
+      t6 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open" }],
+          },
+        },
+      });
+      t6.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T6: reentry stress</h3><ul class=\"ui-content-list\"><li>Goal: catch duplicate subscriptions under fast open/close cycles.</li><li>Scenario: repeatedly trigger open/close in short intervals.</li><li>Expected: one handler path per cycle, no event multiplication or lag.</li><li>Regression signal: duplicated callbacks or inconsistent state after stress.</li></ul>");
+
+      t7a = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open" }],
+          },
+        },
+      });
+      t7a.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T7A</h3><ul class=\"ui-content-list\"><li>Goal: first instance in stack validation.</li><li>Expected: its event subscriptions stay isolated from top-layer instance.</li></ul>");
+
+      t7b = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "open" }],
+          },
+        },
+      });
+      t7b.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T7B</h3><ul class=\"ui-content-list\"><li>Goal: second instance in stack opened above T7A.</li><li>Expected: each modal reacts only to its own lifecycle events.</li></ul>");
+
+      t8 = await createT8Modal();
+
+      t9 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [
+              { do: "boom", event: ["after:open"] },
+              { do: "close", event: ["after:open"], when: "open" },
+            ],
+          },
+        },
+      });
+      t9.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T9: invalid do</h3><ul class=\"ui-content-list\"><li>Goal: validate action name guard.</li><li>Scenario: one invalid <span class=\"ui-mono\">do</span> plus one valid fallback rule.</li><li>Expected: invalid rule is ignored, valid rule still executes.</li><li>Regression signal: mount crash or valid fallback ignored.</li></ul>");
+
+      t10 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [
+              { do: "close" },
+              { do: "close", event: [null, 123, ""] },
+              { do: "close", event: ["after:open"], when: "open" },
+            ],
+          },
+        },
+      });
+      t10.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T10: missing/invalid event</h3><ul class=\"ui-content-list\"><li>Goal: validate event-name parsing and fallback behavior.</li><li>Scenario: invalid event payloads mixed with one valid event.</li><li>Expected: invalid entries are ignored and valid event still binds.</li><li>Regression signal: all bindings dropped or runtime error thrown.</li></ul>");
+
+      t11 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [
+              null,
+              [],
+              { do: "close", event: ["after:open"], when: "open" },
+            ],
+          },
+        },
+      });
+      t11.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T11: invalid config entries</h3><ul class=\"ui-content-list\"><li>Goal: ensure non-object configs are skipped safely.</li><li>Expected: invalid config entries are ignored; valid rule continues to work.</li><li>Regression signal: plugin aborts mount after malformed entry.</li></ul>");
+
+      t12 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [
+              null,
+              {},
+              { do: "boom", event: ["after:open"] },
+              { do: "close", event: [null, ""] },
+            ],
+          },
+        },
+      });
+      t12.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T12: no handlers bound</h3><ul class=\"ui-content-list\"><li>Goal: hit path where plugin binds zero handlers.</li><li>Scenario: every rule is malformed or unbindable.</li><li>Expected: modal still opens, but no event-driven action is executed.</li><li>Regression signal: action fires from invalid rules or mount throws.</li></ul>");
+
+      t13 = await Modal.create({
+        config: { target: document.body },
+        features: {
+          actionOnEvent: {
+            enabled: true,
+            rules: [{ do: "close", event: ["after:open"], when: "closed" }],
+          },
+        },
+      });
+      t13.setContent("<h3 class=\"ui-content-title\">ActionOnEvent T13: when mismatch</h3><ul class=\"ui-content-list\"><li>Goal: verify guard logic from <span class=\"ui-mono\">when</span>.</li><li>Scenario: event <span class=\"ui-mono\">after:open</span> guarded by <span class=\"ui-mono\">when: closed</span>.</li><li>Expected: action is skipped because modal is open when event fires.</li><li>Regression signal: close fires despite guard mismatch.</li></ul>");
+    }
+
+    await createTechModals();
+    const modals = [t1, t2, t3, t4, t5, t6, t7a, t8, t9, t10, t11, t12, t13];
+    const cards = [
+      { id: "Custom", modal: customDefault },
+      { id: "T1", modal: t1 },
+      { id: "T2", modal: t2 },
+      { id: "T3", modal: t3 },
+      { id: "T4", modal: t4 },
+      { id: "T5", modal: t5 },
+      { id: "T6", modal: t6 },
+      { id: "T7", modal: t7a },
+      { id: "T8", modal: t8 },
+      { id: "T9", modal: t9 },
+      { id: "T10", modal: t10 },
+      { id: "T11", modal: t11 },
+      { id: "T12", modal: t12 },
+      { id: "T13", modal: t13 },
+    ];
+
+    document.getElementById("closeAllActionOnEvent")?.addEventListener("click", () => {
+      for (const modal of [customDefault, ...modals, t7b]) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    });
+
+    for (let i = 0; i < cards.length; i++) {
+      const { id, modal } = cards[i];
+      const openButton = document.getElementById(`openInstance${id}`);
+      const preCode = document.getElementById(`preActionOnEventCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (openButton && modal) {
+        openButton.addEventListener("click", async () => {
+          if (id === "T6") {
+            let ticks = 0;
+            const timer = setInterval(() => {
+              if (ticks % 2 === 0) t6.open();
+              else t6.close();
+              ticks += 1;
+              if (ticks >= 10) clearInterval(timer);
+            }, 90);
+            return;
+          }
+
+          if (id === "T7") {
+            t7a.open();
+            setTimeout(() => t7b.open(), 260);
+            return;
+          }
+
+          if (id === "T8") {
+            await t8.open();
+            setTimeout(async () => {
+              try {
+                t8.destroy();
+              } catch {}
+
+              t8 = await createT8Modal();
+              if (preCode) {
+                preCode.textContent = JSON.stringify(t8?.settings?.features?.actionOnEvent ?? {}, null, 2);
+              }
+              window.__modalsActionOnEvent.t8 = t8;
+            }, 140);
+            return;
+          }
+
+          modal.open();
+        });
+      }
+
+      if (preCode && modal) {
+        if (id === "T7") {
+          preCode.textContent = JSON.stringify(
+            {
+              t7a: t7a?.settings?.features?.actionOnEvent ?? {},
+              t7b: t7b?.settings?.features?.actionOnEvent ?? {},
+            },
+            null,
+            2
+          );
+        } else {
+          preCode.textContent = JSON.stringify(modal?.settings?.features?.actionOnEvent ?? {}, null, 2);
+        }
+      }
+
+      if (tools && preCode) {
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.className = "ui-btn-mini";
+        copyButton.textContent = "Copy code";
+        copyButton.addEventListener("click", async () => {
+          const text = preCode.textContent ?? "";
+          if (!text.trim()) return;
+          try {
+            await navigator.clipboard.writeText(text);
+            copyButton.textContent = "Copied";
+          } catch {
+            copyButton.textContent = "Copy error";
+          }
+          setTimeout(() => {
+            copyButton.textContent = "Copy code";
+          }, 1200);
+        });
+        tools.prepend(copyButton);
+      }
+    }
+
+    window.__modalsActionOnEvent = {
+      customDefault,
+      t1, t2, t3, t4, t5, t6, t7a, t7b, t8, t9, t10, t11, t12, t13,
+    };
+  </script>
+</body>
+</html>

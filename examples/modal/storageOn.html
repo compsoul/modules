@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StorageOn Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | storageOn</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">storageOn</span>. This plugin writes to <span class="ui-mono">localStorage</span> or <span class="ui-mono">sessionStorage</span> from delegated DOM events on modal roles such as <span class="ui-mono">panel</span>, <span class="ui-mono">close</span>, and <span class="ui-mono">backdrop</span>.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">StorageOn Instances</h2>
+      <p class="ui-section-subtitle">Open a scenario, use buttons inside the modal to trigger configured storage writes, then read or clear the test key from the card.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllStorageOn" class="ui-btn ui-btn-neutral">Close all</button>
+        <button id="clearAllStorageOn" class="ui-btn ui-btn-neutral">Clear test storage</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const activeModals = new Set();
+    const scenarioInstances = new Map();
+    const storageOnSourceById = {};
+    const storagePrefix = "modal:storageOn:";
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const closeByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+            ],
+          },
+        ],
+      },
+    };
+
+    function keyFor(id) {
+      return `${storagePrefix}${id}`;
+    }
+
+    function storageFor(type = "local") {
+      return type === "session" ? sessionStorage : localStorage;
+    }
+
+    function storageRule(id, overrides = {}) {
+      return {
+        key: keyFor(id),
+        storage: overrides.storage ?? "local",
+        do: overrides.do ?? "set",
+        value: overrides.value ?? `${id}:set`,
+        on: overrides.on ?? [["panel", "click", "[data-storage-set]"]],
+      };
+    }
+
+    function baseSettings(rules, extraFeatures = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByClick,
+          ...closeByEsc,
+          storageOn: {
+            enabled: true,
+            rules,
+          },
+          ...extraFeatures,
+        },
+      };
+    }
+
+    function storageContent(title, rows = []) {
+      return `
+        <h3 class="ui-content-title">${title}</h3>
+        <ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-storage-set>Set in modal</button>
+          <button type="button" class="ui-btn ui-btn-neutral" data-storage-remove>Remove in modal</button>
+          <button type="button" class="ui-btn ui-btn-tech" data-storage-filtered>Filtered selector</button>
+          <button type="button" class="ui-btn ui-btn-neutral" data-storage-ignored>Ignored button</button>
+        </div>
+        <div class="ui-row ui-mt-sm">
+          <input class="ui-input" aria-label="Storage on input" placeholder="Focusable input" />
+        </div>
+      `;
+    }
+
+    const scenarios = {
+      Custom: {
+        label: "Custom default",
+        key: keyFor("Custom"),
+        storage: "local",
+        settings: baseSettings([storageRule("Custom")]),
+        content: storageContent("StorageOn custom default", [
+          "Goal: baseline panel delegated set action.",
+          "Click Set in modal. Expected: local key is set to Custom:set.",
+        ]),
+      },
+      T1: {
+        label: "T1 disabled",
+        key: keyFor("T1"),
+        storage: "local",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            storageOn: {
+              enabled: false,
+              rules: [storageRule("T1")],
+            },
+          },
+        },
+        content: storageContent("StorageOn T1: disabled", [
+          "Goal: confirm disabled plugin binds no DOM handlers.",
+          "Expected: clicking Set in modal does not write the key.",
+        ]),
+      },
+      T2: {
+        label: "T2 no rules",
+        key: keyFor("T2"),
+        storage: "local",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            storageOn: {
+              enabled: true,
+            },
+          },
+        },
+        content: storageContent("StorageOn T2: enabled without rules", [
+          "Goal: validate enabled plugin with no rules.",
+          "Expected: debug says no rules and no storage write occurs.",
+        ]),
+      },
+      T3: {
+        label: "T3 set local",
+        key: keyFor("T3"),
+        storage: "local",
+        settings: baseSettings([storageRule("T3", { value: "local-set" })]),
+        content: storageContent("StorageOn T3: local set", [
+          "Goal: set localStorage from panel delegated click.",
+          "Expected: Set in modal writes local-set.",
+        ]),
+      },
+      T4: {
+        label: "T4 remove local",
+        key: keyFor("T4"),
+        storage: "local",
+        settings: baseSettings([
+          storageRule("T4", {
+            do: "remove",
+            on: [["panel", "click", "[data-storage-remove]"]],
+          }),
+        ]),
+        content: storageContent("StorageOn T4: local remove", [
+          "Goal: remove localStorage from panel delegated click.",
+          "Use Set key on the card first, then click Remove in modal.",
+        ]),
+      },
+      T5: {
+        label: "T5 session set",
+        key: keyFor("T5"),
+        storage: "session",
+        settings: baseSettings([storageRule("T5", { storage: "session", value: "session-set" })]),
+        content: storageContent("StorageOn T5: session set", [
+          "Goal: set sessionStorage from modal content.",
+          "Expected: Set in modal writes session-set into sessionStorage.",
+        ]),
+      },
+      T6: {
+        label: "T6 custom value",
+        key: keyFor("T6"),
+        storage: "local",
+        settings: baseSettings([storageRule("T6", { value: "custom-value-6" })]),
+        content: storageContent("StorageOn T6: custom value", [
+          "Goal: verify custom value is stringified and written.",
+          "Expected: key value becomes custom-value-6.",
+        ]),
+      },
+      T7: {
+        label: "T7 selector filter",
+        key: keyFor("T7"),
+        storage: "local",
+        settings: baseSettings([
+          storageRule("T7", {
+            value: "filtered",
+            on: [["panel", "click", "[data-storage-filtered]"]],
+          }),
+        ]),
+        content: storageContent("StorageOn T7: selector filtering", [
+          "Goal: verify delegated selector filtering.",
+          "Expected: Filtered selector writes the key; Ignored button does not.",
+        ]),
+      },
+      T8: {
+        label: "T8 rwd variants",
+        key: keyFor("T8"),
+        storage: "local",
+        altStorage: "session",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            titleBlinkOnAway: {
+              enabled: true,
+              options: {
+                title: "StorageOn T8 | desktop local",
+                interval: 900,
+              },
+            },
+            storageOn: {
+              enabled: true,
+              rules: [storageRule("T8", { value: "desktop-local" })],
+            },
+          },
+          rwd: {
+            "(max-width: 767px)": {
+              features: {
+                titleBlinkOnAway: {
+                  enabled: true,
+                  options: {
+                    title: "StorageOn T8 | mobile session",
+                    interval: 700,
+                  },
+                },
+                storageOn: {
+                  enabled: true,
+                  rules: [storageRule("T8", { storage: "session", value: "mobile-session" })],
+                },
+              },
+            },
+          },
+        },
+        content: storageContent("StorageOn T8: RWD variants", [
+          "Goal: verify responsive storage target/rule swap.",
+          "Desktop/tablet: localStorage gets desktop-local. Mobile <=767: sessionStorage gets mobile-session.",
+        ]),
+      },
+      T9: {
+        label: "T9 full stack",
+        key: keyFor("T9"),
+        storage: "local",
+        settings: baseSettings([storageRule("T9", { value: "full-stack" })], {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "StorageOn T9 active",
+              interval: 1000,
+            },
+          },
+        }),
+        content: storageContent("StorageOn T9: full stack", [
+          "Goal: validate storageOn with common modal plugins enabled.",
+          "Expected: storage write works and close/focus/lock cleanup remains stable.",
+        ]),
+      },
+      T10: {
+        label: "T10 close role",
+        key: keyFor("T10"),
+        storage: "local",
+        settings: baseSettings([
+          storageRule("T10", {
+            value: "close-click",
+            on: [["close", "click"]],
+          }),
+        ]),
+        content: storageContent("StorageOn T10: close role", [
+          "Goal: write storage from the close button role.",
+          "Expected: clicking the modal close button writes close-click and closes the modal.",
+        ]),
+      },
+      T11: {
+        label: "T11 backdrop role",
+        key: keyFor("T11"),
+        storage: "local",
+        settings: baseSettings([
+          storageRule("T11", {
+            value: "backdrop-click",
+            on: [["backdrop", "click"]],
+          }),
+        ]),
+        content: storageContent("StorageOn T11: backdrop role", [
+          "Goal: write storage from the backdrop role.",
+          "Expected: clicking backdrop writes backdrop-click and closes the modal.",
+        ]),
+      },
+      T12: {
+        label: "T12 multi trigger",
+        key: keyFor("T12"),
+        storage: "local",
+        settings: baseSettings([
+          storageRule("T12", {
+            value: "multi-trigger",
+            on: [
+              ["panel", "click", "[data-storage-set]"],
+              ["close", "click"],
+            ],
+          }),
+        ]),
+        content: storageContent("StorageOn T12: multiple triggers", [
+          "Goal: one rule bound to multiple triggers.",
+          "Expected: Set in modal and close button both write multi-trigger.",
+        ]),
+      },
+      T13: {
+        label: "T13 destroy/recreate",
+        key: keyFor("T13"),
+        storage: "local",
+        settings: baseSettings([storageRule("T13", { value: "after-recreate" })]),
+        content: storageContent("StorageOn T13: destroy/recreate", [
+          "Goal: verify delegated handlers are removed and rebound after recreate.",
+          "Scenario: Destroy button recreates the instance; Set in modal should still work after reopen.",
+        ]),
+      },
+      T14: {
+        label: "T14 invalid rules",
+        key: keyFor("T14"),
+        storage: "local",
+        settings: baseSettings([
+          null,
+          {
+            key: "",
+            do: "set",
+            on: [["panel", "click", "[data-storage-set]"]],
+          },
+          {
+            key: keyFor("T14"),
+            do: "boom",
+            on: [["panel", "click", "[data-storage-set]"]],
+          },
+          {
+            key: keyFor("T14"),
+            do: "set",
+            storage: "cookie",
+            on: [["panel", "click", "[data-storage-set]"]],
+          },
+        ]),
+        content: storageContent("StorageOn T14: invalid rules", [
+          "Goal: verify invalid config, key, do, and storage warnings.",
+          "Expected: no valid handler writes this key.",
+        ]),
+      },
+      T15: {
+        label: "T15 fallback rule",
+        key: keyFor("T15"),
+        storage: "local",
+        settings: baseSettings([
+          {
+            key: "",
+            do: "set",
+            on: [["panel", "click", "[data-storage-set]"]],
+          },
+          storageRule("T15", { value: "fallback-valid" }),
+        ]),
+        content: storageContent("StorageOn T15: fallback valid rule", [
+          "Goal: verify bad rules do not block a later valid storage handler.",
+          "Expected: warnings appear, then Set in modal writes fallback-valid.",
+        ]),
+      },
+    };
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      storageOnSourceById[id] = scenario.settings;
+    }
+
+    function createCard(id, scenario) {
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      article.innerHTML = `
+        <button id="openInstance${id}" class="ui-btn ui-btn-tech ui-btn-block-start">${scenario.label}</button>
+        <small id="statusStorageOn${id}" class="ui-card-hint">Key: ${scenario.storage}:${scenario.key}</small>
+        <div class="ui-card-tools">
+          <label class="ui-btn-mini" for="showStorageOnCode${id}">Show code</label>
+        </div>
+        <div class="ui-card-tools">
+          <button type="button" class="ui-btn-mini" id="setStorageOn${id}">Set key</button>
+          <button type="button" class="ui-btn-mini" id="clearStorageOn${id}">Clear key</button>
+          <button type="button" class="ui-btn-mini" id="readStorageOn${id}">Read key</button>
+          <button type="button" class="ui-btn-mini" id="destroyStorageOn${id}">Destroy</button>
+        </div>
+        <input type="checkbox" class="ui-toggle" id="showStorageOnCode${id}" />
+        <div class="ui-code-wrap"><pre id="preStorageOnCode${id}" class="ui-code ui-mono"></pre></div>
+      `;
+      return article;
+    }
+
+    function setStatus(id, text) {
+      const status = document.getElementById(`statusStorageOn${id}`);
+      if (status) status.textContent = text;
+    }
+
+    function readScenarioKey(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const value = storageFor(scenario.storage).getItem(scenario.key);
+      if (scenario.altStorage) {
+        const altValue = storageFor(scenario.altStorage).getItem(scenario.key);
+        setStatus(id, `${scenario.storage}:${value ?? "null"} | ${scenario.altStorage}:${altValue ?? "null"}`);
+        return value ?? altValue;
+      }
+
+      setStatus(id, `${scenario.storage}:${scenario.key} = ${value ?? "null"}`);
+      return value;
+    }
+
+    function setScenarioKey(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return;
+
+      storageFor(scenario.storage).setItem(scenario.key, "manual");
+      readScenarioKey(id);
+    }
+
+    function clearScenarioKey(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return;
+
+      storageFor(scenario.storage).removeItem(scenario.key);
+      readScenarioKey(id);
+    }
+
+    function clearAllStorageOnKeys() {
+      for (const scenario of Object.values(scenarios)) {
+        try {
+          localStorage.removeItem(scenario.key);
+          sessionStorage.removeItem(scenario.key);
+        } catch {}
+      }
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(preCode.textContent ?? "");
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    function rememberScenarioInstance(id, modal) {
+      activeModals.add(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      list.push(modal);
+      scenarioInstances.set(id, list);
+    }
+
+    function forgetScenarioInstance(id, modal) {
+      activeModals.delete(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      const next = list.filter((entry) => entry !== modal);
+      if (next.length > 0) {
+        scenarioInstances.set(id, next);
+      } else {
+        scenarioInstances.delete(id);
+      }
+    }
+
+    async function createScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const modal = await Modal.create(scenario.settings);
+      modal.setContent(scenario.content);
+      modal.subscribe("open", () => setStatus(id, "Opened"));
+      modal.subscribe("close", () => {
+        setStatus(id, "Closed");
+        setTimeout(() => readScenarioKey(id), 0);
+      });
+      modal.subscribe("destroy", () => setStatus(id, "Destroyed"));
+      rememberScenarioInstance(id, modal);
+      return modal;
+    }
+
+    function destroyScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      for (const modal of list) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+      }
+      scenarioInstances.delete(id);
+    }
+
+    async function ensureScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      const current = list.find((modal) => !modal.destroyed);
+      if (current) return current;
+      return createScenario(id);
+    }
+
+    async function openScenario(id) {
+      const modal = await ensureScenario(id);
+      if (!modal) return;
+      await modal.open();
+    }
+
+    async function destroyByButton(id) {
+      const modal = await ensureScenario(id);
+      if (!modal) return;
+
+      try {
+        modal.destroy();
+      } catch {}
+
+      if (modal.destroyed) {
+        forgetScenarioInstance(id, modal);
+      }
+
+      if (id === "T13") {
+        await createScenario("T13");
+        setStatus("T13", "Destroyed and recreated");
+      }
+    }
+
+    const instancesGrid = document.getElementById("instancesGrid");
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      instancesGrid?.append(createCard(id, scenario));
+
+      const openButton = document.getElementById(`openInstance${id}`);
+      const setButton = document.getElementById(`setStorageOn${id}`);
+      const clearButton = document.getElementById(`clearStorageOn${id}`);
+      const readButton = document.getElementById(`readStorageOn${id}`);
+      const destroyButton = document.getElementById(`destroyStorageOn${id}`);
+      const preCode = document.getElementById(`preStorageOnCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      openButton?.addEventListener("click", () => openScenario(id));
+      setButton?.addEventListener("click", () => setScenarioKey(id));
+      clearButton?.addEventListener("click", () => clearScenarioKey(id));
+      readButton?.addEventListener("click", () => readScenarioKey(id));
+      destroyButton?.addEventListener("click", () => destroyByButton(id));
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(storageOnSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest("[data-storage-set], [data-storage-remove], [data-storage-filtered], [data-storage-ignored]")) return;
+
+      setTimeout(() => {
+        for (const id of Object.keys(scenarios)) {
+          readScenarioKey(id);
+        }
+      }, 0);
+    });
+
+    document.getElementById("closeAllStorageOn")?.addEventListener("click", () => {
+      for (const modal of Array.from(activeModals)) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    });
+
+    document.getElementById("clearAllStorageOn")?.addEventListener("click", () => {
+      clearAllStorageOnKeys();
+      for (const id of Object.keys(scenarios)) {
+        readScenarioKey(id);
+      }
+    });
+
+    for (const id of Object.keys(scenarios)) {
+      await createScenario(id);
+      readScenarioKey(id);
+    }
+
+    window.__modalsStorageOn = { activeModals, scenarios };
+  </script>
+</body>
+</html>

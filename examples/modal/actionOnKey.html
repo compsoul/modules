@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ActionOnKey Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | actionOnKey</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">actionOnKey</span>. This plugin binds modal actions (<span class="ui-mono">open</span>, <span class="ui-mono">close</span>, <span class="ui-mono">destroy</span>) to document keyboard events by <span class="ui-mono">keys</span> and optional <span class="ui-mono">when</span> state.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">ActionOnKey Instances</h2>
+      <p class="ui-section-subtitle">Each card opens one validation scenario of the <span class="ui-mono">actionOnKey</span> plugin and shows the exact bound rules in a code window. Use the keyboard instructions inside each modal to verify state filters, invalid-rule fallback, stack behavior, and lifecycle cleanup.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllActionKey" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm">
+        <article class="ui-card">
+          <button id="openInstanceCustom" class="ui-btn ui-btn-tech ui-btn-block-start">Custom default</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeCustom">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeCustom" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeCustom" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT1" class="ui-btn ui-btn-tech ui-btn-block-start">T1 disabled</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT1">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT1" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT1" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT2" class="ui-btn ui-btn-tech ui-btn-block-start">T2 default</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT2">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT2" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT2" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT3" class="ui-btn ui-btn-tech ui-btn-block-start">T3 custom keys</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT3">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT3" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT3" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT4" class="ui-btn ui-btn-tech ui-btn-block-start">T4 rwd variants</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT4">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT4" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT4" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT5" class="ui-btn ui-btn-tech ui-btn-block-start">T5 full stack</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT5">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT5" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT5" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT6" class="ui-btn ui-btn-tech ui-btn-block-start">T6 reentry</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT6">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT6" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT6" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT7" class="ui-btn ui-btn-tech ui-btn-block-start">T7 dual stack</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT7">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT7" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT7" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT8" class="ui-btn ui-btn-tech ui-btn-block-start">T8 destroy/recreate</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT8">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT8" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT8" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT9" class="ui-btn ui-btn-tech ui-btn-block-start">T9 open key</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT9">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT9" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT9" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT10" class="ui-btn ui-btn-tech ui-btn-block-start">T10 close key</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT10">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT10" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT10" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT11" class="ui-btn ui-btn-tech ui-btn-block-start">T11 destroy key</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT11">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT11" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT11" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT12" class="ui-btn ui-btn-tech ui-btn-block-start">T12 when states</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT12">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT12" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT12" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT13" class="ui-btn ui-btn-tech ui-btn-block-start">T13 no when</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT13">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT13" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT13" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT14" class="ui-btn ui-btn-tech ui-btn-block-start">T14 many keys</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT14">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT14" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT14" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT15" class="ui-btn ui-btn-tech ui-btn-block-start">T15 fallback</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showActionKeyCodeT15">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showActionKeyCodeT15" />
+          <div class="ui-code-wrap"><pre id="preActionKeyCodeT15" class="ui-code ui-mono"></pre></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    let customDefault;
+    let t1;
+    let t2;
+    let t3;
+    let t4;
+    let t5;
+    let t6;
+    let t7a;
+    let t7b;
+    let t8;
+    let t9;
+    let t10;
+    let t11;
+    let t12;
+    let t13;
+    let t14;
+    let t15;
+    let t8SettingsForRecreate;
+    let t8ContentForRecreate;
+    let t11SettingsForRecreate;
+    let t11ContentForRecreate;
+
+    const actionOnKeySourceById = {};
+
+    async function createTechModals() {
+      const customSettings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+          },
+        },
+      };
+      customDefault = await Modal.create(customSettings);
+      customDefault.setContent("<h3 class=\"ui-content-title\">ActionOnKey custom default</h3><ul class=\"ui-content-list\"><li>Goal: baseline behavior using the default <span class=\"ui-mono\">actionOnKey</span> contract.</li><li>What is bound: close action on <span class=\"ui-mono\">Escape</span>/<span class=\"ui-mono\">Esc</span> while modal is open.</li><li>Expected flow: press Escape to close; click paths stay inert because <span class=\"ui-mono\">actionOn</span> is disabled.</li><li>Regression signal: Escape does nothing or handler fires while the modal is already closed.</li></ul>");
+      actionOnKeySourceById.Custom = customSettings;
+
+      const t1Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: false,
+            rules: [],
+          },
+          closeButton: {
+            enabled: true,
+          },
+          backdrop: {
+            enabled: true,
+          },
+        },
+      };
+      t1 = await Modal.create(t1Settings);
+      t1.setContent("<h3 class=\"ui-content-title\">ActionOnKey T1: disabled plugin</h3><ul class=\"ui-content-list\"><li>Goal: confirm behavior when <span class=\"ui-mono\">actionOnKey</span> is disabled.</li><li>Scenario: close button and backdrop are visible, but no key rules are active.</li><li>Expected flow: Escape does not close this modal; use Close all to reset.</li><li>Regression signal: Escape closes despite the plugin being disabled.</li></ul>");
+      actionOnKeySourceById.T1 = t1Settings;
+
+      const t2Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+          },
+        },
+      };
+      t2 = await Modal.create(t2Settings);
+      t2.setContent("<h3 class=\"ui-content-title\">ActionOnKey T2: default actionOnKey</h3><ul class=\"ui-content-list\"><li>Goal: validate default rules from <span class=\"ui-mono\">modal/defaults.js</span>.</li><li>What is bound: <span class=\"ui-mono\">Escape</span>/<span class=\"ui-mono\">Esc</span> close with <span class=\"ui-mono\">when: open</span>.</li><li>Expected flow: Escape closes consistently on every reopen.</li><li>Regression signal: close works once but not after reopen, or key listener duplicates.</li></ul>");
+      actionOnKeySourceById.T2 = t2Settings;
+
+      const t3Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["x", "X"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t3 = await Modal.create(t3Settings);
+      t3.setContent("<h3 class=\"ui-content-title\">ActionOnKey T3: custom key list</h3><ul class=\"ui-content-list\"><li>Goal: verify custom key matching.</li><li>Rule: close only on <span class=\"ui-mono\">x</span> or <span class=\"ui-mono\">X</span> while open.</li><li>Expected flow: Escape stays inert; X closes the modal.</li><li>Regression signal: wrong key closes or configured key is ignored.</li></ul>");
+      actionOnKeySourceById.T3 = t3Settings;
+
+      const t4Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOnKey T4 | desktop",
+              interval: 900,
+            },
+          },
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+        rwd: {
+          "(max-width: 767px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOnKey T4 | mobile <=767 | q",
+                  interval: 700,
+                },
+              },
+              actionOnKey: {
+                enabled: true,
+                rules: [
+                  {
+                    do: "close",
+                    keys: ["q", "Q"],
+                    when: "open",
+                  },
+                ],
+              },
+            },
+          },
+          "(min-width: 768px) and (max-width: 1023px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOnKey T4 | tablet 768-1023 | Enter",
+                  interval: 800,
+                },
+              },
+              actionOnKey: {
+                enabled: true,
+                rules: [
+                  {
+                    do: "close",
+                    keys: ["Enter"],
+                    when: "open",
+                  },
+                ],
+              },
+            },
+          },
+          "(min-width: 1024px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "ActionOnKey T4 | desktop >=1024 | Escape",
+                  interval: 900,
+                },
+              },
+            },
+          },
+        },
+      };
+      t4 = await Modal.create(t4Settings);
+      t4.setContent("<h3 class=\"ui-content-title\">ActionOnKey T4: RWD variants</h3><ul class=\"ui-content-list\"><li>Goal: verify that <span class=\"ui-mono\">actionOnKey</span> rules are swapped by breakpoint.</li><li><span class=\"ui-mono\">mobile &lt;=767</span>: close on Q.</li><li><span class=\"ui-mono\">tablet 768-1023</span>: close on Enter.</li><li><span class=\"ui-mono\">desktop &gt;=1024</span>: close on Escape.</li><li>Expected flow: each viewport applies only its own key set.</li></ul>");
+      actionOnKeySourceById.T4 = t4Settings;
+
+      const t5Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape", "Esc"],
+                when: "open",
+              },
+            ],
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOnKey T5 active",
+              interval: 1000,
+            },
+          },
+        },
+      };
+      t5 = await Modal.create(t5Settings);
+      t5.setContent("<h3 class=\"ui-content-title\">ActionOnKey T5: full stack</h3><ul class=\"ui-content-list\"><li>Goal: validate <span class=\"ui-mono\">actionOnKey</span> interoperability with other enabled plugins.</li><li>Stack: actionOnKey + actionOn + focusTrap + lockScroll + titleBlinkOnAway.</li><li>Expected flow: Escape, backdrop, and close button all close cleanly.</li><li>Regression signal: one close path bypasses state cleanup or conflicts appear between plugins.</li></ul>");
+      actionOnKeySourceById.T5 = t5Settings;
+
+      const t6Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t6 = await Modal.create(t6Settings);
+      t6.setContent("<h3 class=\"ui-content-title\">ActionOnKey T6: reentry stress</h3><ul class=\"ui-content-list\"><li>Goal: detect duplicated document key listeners or stale cleanup on rapid reuse.</li><li>Scenario: same instance opens/closes repeatedly in quick cadence.</li><li>Expected flow: no event multiplication, no freeze, and Escape still closes once per press.</li><li>Regression signal: delayed reactions, duplicated close attempts, or detached handlers.</li></ul>");
+      actionOnKeySourceById.T6 = t6Settings;
+
+      const t7Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t7a = await Modal.create(t7Settings);
+      t7a.setContent("<h3 class=\"ui-content-title\">ActionOnKey T7A</h3><ul class=\"ui-content-list\"><li>Goal: base layer in two-modal stack validation.</li><li>Expected flow: stays functional before and after top modal appears.</li><li>Checks: Escape should not leave stale key handlers after closing layers.</li></ul>");
+
+      t7b = await Modal.create(t7Settings);
+      t7b.setContent("<h3 class=\"ui-content-title\">ActionOnKey T7B</h3><ul class=\"ui-content-list\"><li>Goal: top layer in stack opened with delay over T7A.</li><li>Expected flow: key handlers remain stable while both instances are open.</li><li>Regression signal: wrong instance reacts repeatedly or closing top breaks bottom handlers.</li></ul>");
+      actionOnKeySourceById.T7 = t7Settings;
+
+      const t8Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t8SettingsForRecreate = t8Settings;
+      t8ContentForRecreate = "<h3 class=\"ui-content-title\">ActionOnKey T8: destroy during run</h3><ul class=\"ui-content-list\"><li>Goal: verify lifecycle safety under forced destroy/recreate.</li><li>Scenario: open modal, destroy instance shortly after, then create a fresh one with identical key rules.</li><li>Expected flow: no runtime errors, no stale document listeners, recreated instance behaves exactly like the original.</li><li>Regression signal: duplicated handlers, broken Escape behavior after recreate, or console exceptions.</li></ul>";
+      t8 = await Modal.create(t8Settings);
+      t8.setContent(t8ContentForRecreate);
+      actionOnKeySourceById.T8 = t8Settings;
+
+      const t9Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "open",
+                keys: ["o", "O"],
+                when: "closed",
+              },
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t9 = await Modal.create(t9Settings);
+      t9.setContent("<h3 class=\"ui-content-title\">ActionOnKey T9: open key</h3><ul class=\"ui-content-list\"><li>Goal: verify <span class=\"ui-mono\">do: open</span> from a key listener.</li><li>Scenario: press Escape to close, then press O on the page to reopen this same modal.</li><li>Expected flow: O opens only while closed; Escape closes only while open.</li><li>Regression signal: O does nothing while closed or repeatedly retriggers while already open.</li></ul>");
+      actionOnKeySourceById.T9 = t9Settings;
+
+      const t10Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["c", "C"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t10 = await Modal.create(t10Settings);
+      t10.setContent("<h3 class=\"ui-content-title\">ActionOnKey T10: close key</h3><ul class=\"ui-content-list\"><li>Goal: verify a custom close key independent from default Escape.</li><li>Scenario: close is bound to C/c with <span class=\"ui-mono\">when: open</span>.</li><li>Expected flow: C closes the modal; Escape is not part of this scenario's key rules.</li><li>Regression signal: wrong key closes or C is ignored.</li></ul>");
+      actionOnKeySourceById.T10 = t10Settings;
+
+      const t11Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "destroy",
+                keys: ["Delete"],
+                when: "open",
+              },
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t11SettingsForRecreate = t11Settings;
+      t11ContentForRecreate = "<h3 class=\"ui-content-title\">ActionOnKey T11: destroy key</h3><ul class=\"ui-content-list\"><li>Goal: verify <span class=\"ui-mono\">do: destroy</span> from a key listener.</li><li>Scenario: press Delete while open to destroy the instance; use the card again to recreate it.</li><li>Expected flow: Delete destroys without stale document listeners; recreated instance works again.</li><li>Regression signal: repeated listeners remain after destroy or the recreated modal reacts twice.</li></ul>";
+      t11 = await Modal.create(t11Settings);
+      t11.setContent(t11ContentForRecreate);
+      actionOnKeySourceById.T11 = t11Settings;
+
+      const t12Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["c", "C"],
+                when: "closed",
+              },
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t12 = await Modal.create(t12Settings);
+      t12.setContent("<h3 class=\"ui-content-title\">ActionOnKey T12: when states</h3><ul class=\"ui-content-list\"><li>Goal: verify state filtering.</li><li>Scenario: C is configured to close only while closed, Escape closes while open.</li><li>Expected flow: C does nothing while open; Escape closes.</li><li>Regression signal: the closed-only branch runs while modal is open.</li></ul>");
+      actionOnKeySourceById.T12 = t12Settings;
+
+      const t13Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["g", "G"],
+              },
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t13 = await Modal.create(t13Settings);
+      t13.setContent("<h3 class=\"ui-content-title\">ActionOnKey T13: no <span class=\"ui-mono\">when</span></h3><ul class=\"ui-content-list\"><li>Goal: verify a key rule without a state filter.</li><li>Scenario: G closes with no <span class=\"ui-mono\">when</span>; Escape remains a normal open-state close rule.</li><li>Expected flow: G closes while open and does not throw while closed.</li><li>Regression signal: missing <span class=\"ui-mono\">when</span> blocks binding or behaves differently after reopen.</li></ul>");
+      actionOnKeySourceById.T13 = t13Settings;
+
+      const t14Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["a", "A", "ArrowLeft", "ArrowRight"],
+                when: "open",
+              },
+              {
+                do: "close",
+                keys: ["Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t14 = await Modal.create(t14Settings);
+      t14.setContent("<h3 class=\"ui-content-title\">ActionOnKey T14: many keys</h3><ul class=\"ui-content-list\"><li>Goal: verify multiple valid key names in one rule.</li><li>Scenario: A, ArrowLeft, ArrowRight, or Escape can close while open.</li><li>Expected flow: every listed key works, unlisted keys stay inert.</li><li>Regression signal: only the first key works or arrow key names are not matched.</li></ul>");
+      actionOnKeySourceById.T14 = t14Settings;
+
+      const t15Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "boom",
+                keys: ["Escape"],
+              },
+              {
+                do: "close",
+                keys: [],
+              },
+              {
+                do: "close",
+                keys: [123, "", null, "Escape"],
+                when: "open",
+              },
+            ],
+          },
+        },
+      };
+      t15 = await Modal.create(t15Settings);
+      t15.setContent("<h3 class=\"ui-content-title\">ActionOnKey T15: fallback</h3><ul class=\"ui-content-list\"><li>Goal: verify that bad key rules do not block a later valid key fallback.</li><li>Scenario: invalid action and empty keys appear before a valid Escape rule with mixed key entries.</li><li>Expected flow: warnings appear in debug; Escape still closes via the valid fallback.</li><li>Regression signal: parser aborts after the first bad rule or binds invalid entries.</li></ul>");
+      actionOnKeySourceById.T15 = t15Settings;
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        const text = preCode.textContent ?? "";
+        if (!text.trim()) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    await createTechModals();
+
+    const modals = [t1, t2, t3, t4, t5, t6, t7a, t8, t9, t10, t11, t12, t13, t14, t15];
+    const cards = [
+      { id: "Custom", modal: customDefault },
+      { id: "T1", modal: t1 },
+      { id: "T2", modal: t2 },
+      { id: "T3", modal: t3 },
+      { id: "T4", modal: t4 },
+      { id: "T5", modal: t5 },
+      { id: "T6", modal: t6 },
+      { id: "T7", modal: t7a },
+      { id: "T8", modal: t8 },
+      { id: "T9", modal: t9 },
+      { id: "T10", modal: t10 },
+      { id: "T11", modal: t11 },
+      { id: "T12", modal: t12 },
+      { id: "T13", modal: t13 },
+      { id: "T14", modal: t14 },
+      { id: "T15", modal: t15 },
+    ];
+
+    document.getElementById("closeAllActionKey")?.addEventListener("click", () => {
+      for (const modal of [customDefault, ...modals, t7b]) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    });
+
+    for (let i = 0; i < cards.length; i++) {
+      const { id, modal } = cards[i];
+      const openButton = document.getElementById(`openInstance${id}`);
+      const preCode = document.getElementById(`preActionKeyCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (openButton) {
+        openButton.addEventListener("click", async () => {
+          if (id === "T6") {
+            let ticks = 0;
+            const timer = setInterval(() => {
+              if (ticks % 2 === 0) t6.open();
+              else t6.close();
+              ticks += 1;
+              if (ticks >= 10) clearInterval(timer);
+            }, 90);
+            return;
+          }
+
+          if (id === "T7") {
+            t7a.open();
+            setTimeout(() => t7b.open(), 260);
+            return;
+          }
+
+          if (id === "T8") {
+            await t8.open();
+            setTimeout(async () => {
+              try {
+                t8.destroy();
+              } catch {}
+              t8 = await Modal.create(t8SettingsForRecreate);
+              t8.setContent(t8ContentForRecreate);
+              if (preCode) {
+                preCode.textContent = JSON.stringify(actionOnKeySourceById.T8 ?? {}, null, 2);
+              }
+              window.__modalsActionOnKey.t8 = t8;
+            }, 140);
+            return;
+          }
+
+          if (id === "T11") {
+            try {
+              await t11.open();
+            } catch {
+              t11 = await Modal.create(t11SettingsForRecreate);
+              t11.setContent(t11ContentForRecreate);
+              window.__modalsActionOnKey.t11 = t11;
+              await t11.open();
+            }
+            return;
+          }
+
+          modal.open();
+        });
+      }
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(actionOnKeySourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    window.__modalsActionOnKey = { customDefault, t1, t2, t3, t4, t5, t6, t7a, t7b, t8, t9, t10, t11, t12, t13, t14, t15 };
+  </script>
+</body>
+</html>

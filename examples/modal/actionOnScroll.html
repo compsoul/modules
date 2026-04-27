@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ActionOnScroll Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | actionOnScroll</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">actionOnScroll</span>. This plugin tracks document scroll distance and runs modal actions (<span class="ui-mono">open</span>, <span class="ui-mono">close</span>, <span class="ui-mono">destroy</span>) after configured <span class="ui-mono">amount</span> thresholds.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">ActionOnScroll Instances</h2>
+      <p class="ui-section-subtitle">Each checkbox arms one scenario. Select tests, refresh the page, then scroll downward by the configured amount. Use the scroll target at the bottom to re-test longer distances.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllActionOnScroll" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm"></div>
+    </section>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">Scroll target</h2>
+      <p class="ui-section-subtitle">This filler makes the document tall enough to test scroll thresholds, once behavior, rearming after close, and cleanup after destroy.</p>
+      <div style="min-height: 180vh;"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const activeModals = new Set();
+    const scenarioInstances = new Map();
+    const actionOnScrollSourceById = {};
+    const armedStorageKey = "modal:actionOnScroll:armed";
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const closeByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+            ],
+          },
+        ],
+      },
+    };
+
+    function actionOnScrollContent(title, rows = []) {
+      return `<h3 class="ui-content-title">${title}</h3><ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul><div class="ui-row ui-mt-sm"><button type="button" class="ui-btn ui-btn-tech">Focusable control</button><input class="ui-input" aria-label="Action on scroll input" placeholder="Scroll again after close" /></div>`;
+    }
+
+    function baseSettings(rules, extraFeatures = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByClick,
+          ...closeByEsc,
+          actionOnScroll: {
+            enabled: true,
+            rules,
+          },
+          ...extraFeatures,
+        },
+      };
+    }
+
+    function readArmed() {
+      try {
+        return JSON.parse(sessionStorage.getItem(armedStorageKey) ?? "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function writeArmed(ids) {
+      sessionStorage.setItem(armedStorageKey, JSON.stringify([...new Set(ids)]));
+    }
+
+    function setArmed(id, armed) {
+      const ids = readArmed().filter((entry) => entry !== id);
+      if (armed) ids.push(id);
+      writeArmed(ids);
+    }
+
+    const scenarios = {
+      Custom: {
+        label: "Custom default",
+        settings: baseSettings([{ do: "open", amount: 240, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll custom default", [
+          "Goal: baseline actionOnScroll behavior.",
+          "Expected: scroll down about 240 px and the modal opens once.",
+        ]),
+      },
+      T1: {
+        label: "T1 disabled",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionOnScroll: {
+              enabled: false,
+              rules: [
+                {
+                  do: "open",
+                  amount: 120,
+                  once: true,
+                  when: "closed",
+                },
+              ],
+            },
+          },
+        },
+        content: actionOnScrollContent("ActionOnScroll T1: disabled", [
+          "Goal: confirm disabled plugin does not bind scroll handlers.",
+          "Expected: scrolling does not open the modal.",
+        ]),
+      },
+      T2: {
+        label: "T2 default",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionOnScroll: {
+              enabled: true,
+            },
+          },
+        },
+        content: actionOnScrollContent("ActionOnScroll T2: default", [
+          "Goal: validate default rules from modal/defaults.js.",
+          "Expected: default action opens the modal after the configured amount.",
+        ]),
+      },
+      T3: {
+        label: "T3 short amount",
+        settings: baseSettings([{ do: "open", amount: 80, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T3: short amount", [
+          "Goal: verify a small scroll threshold.",
+          "Expected: short scroll down opens the modal.",
+        ]),
+      },
+      T4: {
+        label: "T4 rwd variants",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionOnScroll: {
+              enabled: true,
+              rules: [
+                {
+                  do: "open",
+                  amount: 420,
+                  once: true,
+                  when: "closed",
+                },
+              ],
+            },
+            titleBlinkOnAway: {
+              enabled: true,
+              options: {
+                title: "ActionOnScroll T4 | desktop amount",
+                interval: 900,
+              },
+            },
+          },
+          rwd: {
+            "(max-width: 767px)": {
+              features: {
+                actionOnScroll: {
+                  enabled: true,
+                  rules: [
+                    {
+                      do: "open",
+                      amount: 100,
+                      once: true,
+                      when: "closed",
+                    },
+                  ],
+                },
+                titleBlinkOnAway: {
+                  enabled: true,
+                  options: {
+                    title: "ActionOnScroll T4 | mobile amount",
+                    interval: 700,
+                  },
+                },
+              },
+            },
+          },
+        },
+        content: actionOnScrollContent("ActionOnScroll T4: RWD variants", [
+          "Goal: verify responsive amount rules.",
+          "Mobile opens after about 100 px; larger viewports after about 420 px.",
+        ]),
+      },
+      T5: {
+        label: "T5 full stack",
+        settings: baseSettings([{ do: "open", amount: 260, once: true, when: "closed" }], {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOnScroll T5 active",
+              interval: 1000,
+            },
+          },
+        }),
+        content: actionOnScrollContent("ActionOnScroll T5: full stack", [
+          "Goal: validate actionOnScroll with common modal plugins enabled.",
+          "Expected: scroll opens the modal and close paths clean up normally.",
+        ]),
+      },
+      T6: {
+        label: "T6 reentry",
+        settings: baseSettings([{ do: "open", amount: 120, once: false, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T6: reentry", [
+          "Goal: verify repeatable scroll behavior.",
+          "Expected: close the modal, scroll another 120 px from the rearmed position, and it can reopen.",
+        ]),
+      },
+      T7: {
+        label: "T7 dual stack",
+        settings: baseSettings([{ do: "open", amount: 180, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T7: dual stack", [
+          "Goal: two independent instances listen for scroll.",
+          "Expected: one scroll threshold can open both instances; stacking and closing should remain stable.",
+        ]),
+      },
+      T8: {
+        label: "T8 destroy before scroll",
+        settings: baseSettings([{ do: "open", amount: 160, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T8: destroy before scroll", [
+          "Goal: verify destroy removes the window scroll listener.",
+          "Scenario: instance is destroyed after 150 ms.",
+          "Expected: scrolling after destroy does not open a stale modal.",
+        ]),
+      },
+      T9: {
+        label: "T9 large amount",
+        settings: baseSettings([{ do: "open", amount: 700, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T9: large amount", [
+          "Goal: verify a larger scroll threshold.",
+          "Expected: small scroll does nothing; deeper scroll opens the modal.",
+        ]),
+      },
+      T10: {
+        label: "T10 repeatable open",
+        settings: baseSettings([{ do: "open", amount: 140, once: false, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T10: repeatable open", [
+          "Goal: validate once=false with do=open.",
+          "Expected: each close rearms from the current scroll position.",
+        ]),
+      },
+      T11: {
+        label: "T11 once open",
+        settings: baseSettings([{ do: "open", amount: 140, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T11: once true", [
+          "Goal: validate single-fire behavior.",
+          "Expected: after first open and close, further scrolling does not reopen.",
+        ]),
+      },
+      T12: {
+        label: "T12 when open",
+        hint: "Press O to open, then scroll to close",
+        settings: baseSettings([{ do: "close", amount: 120, once: false, when: "open" }], {
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape", "Esc"],
+                when: "open",
+              },
+              {
+                do: "open",
+                keys: ["o", "O"],
+                when: "closed",
+              },
+            ],
+          },
+          lockScroll: {
+            enabled: false,
+          },
+        }),
+        content: actionOnScrollContent("ActionOnScroll T12: when open", [
+          "Goal: verify when=open only allows the scroll action while modal is already open.",
+          "Press O to open this modal, then scroll down. LockScroll is disabled here so the document can still move.",
+          "Expected: scrolling while open closes the modal; after close, the rule can rearm.",
+        ]),
+      },
+      T13: {
+        label: "T13 destroy action",
+        settings: baseSettings([{ do: "destroy", amount: 120, once: true }]),
+        content: actionOnScrollContent("ActionOnScroll T13: do destroy", [
+          "Goal: verify do=destroy on scroll threshold.",
+          "Expected: scrolling destroys the instance and no modal opens.",
+        ]),
+      },
+      T14: {
+        label: "T14 invalid rules",
+        settings: baseSettings([{ do: "boom", amount: 100 }, { do: "open", amount: -1 }]),
+        content: actionOnScrollContent("ActionOnScroll T14: invalid rules", [
+          "Goal: verify invalid do and invalid amount warnings.",
+          "Expected: debug warnings appear and no handler opens the modal.",
+        ]),
+      },
+      T15: {
+        label: "T15 fallback",
+        settings: baseSettings([{ do: "boom", amount: 100 }, null, { do: "open", amount: 160, once: true, when: "closed" }]),
+        content: actionOnScrollContent("ActionOnScroll T15: fallback", [
+          "Goal: verify bad rules do not block a later valid rule.",
+          "Expected: warnings appear, then valid fallback opens the modal after scrolling.",
+        ]),
+      },
+    };
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      actionOnScrollSourceById[id] = scenario.settings;
+    }
+
+    function createCard(id, scenario) {
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      const hint = scenario.hint ? `<small class="ui-card-hint">${scenario.hint}</small>` : "";
+      article.innerHTML = `
+        <label><input type="checkbox" id="armInstance${id}" /> <span>${scenario.label}</span></label>
+        ${hint}
+        <div class="ui-card-tools">
+          <label class="ui-btn-mini" for="showActionOnScrollCode${id}">Show code</label>
+        </div>
+        <input type="checkbox" class="ui-toggle" id="showActionOnScrollCode${id}" />
+        <div class="ui-code-wrap"><pre id="preActionOnScrollCode${id}" class="ui-code ui-mono"></pre></div>
+      `;
+      return article;
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(preCode.textContent ?? "");
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    function rememberScenarioInstance(id, modal) {
+      activeModals.add(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      list.push(modal);
+      scenarioInstances.set(id, list);
+    }
+
+    function forgetScenarioInstance(id, modal) {
+      activeModals.delete(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      const next = list.filter((entry) => entry !== modal);
+      if (next.length > 0) {
+        scenarioInstances.set(id, next);
+      } else {
+        scenarioInstances.delete(id);
+      }
+    }
+
+    function destroyScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      for (const modal of list) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+      }
+      scenarioInstances.delete(id);
+    }
+
+    async function createScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const modal = await Modal.create(scenario.settings);
+      modal.setContent(scenario.content);
+      rememberScenarioInstance(id, modal);
+      return modal;
+    }
+
+    async function runScenario(id) {
+      if (id === "T7") {
+        await createScenario("T7");
+        await createScenario("T7");
+        return;
+      }
+
+      if (id === "T8") {
+        const modal = await createScenario("T8");
+        setTimeout(() => {
+          try {
+            modal?.destroy();
+            forgetScenarioInstance("T8", modal);
+          } catch {}
+        }, 150);
+        return;
+      }
+
+      await createScenario(id);
+    }
+
+    document.getElementById("closeAllActionOnScroll")?.addEventListener("click", () => {
+      for (const id of Object.keys(scenarios)) {
+        destroyScenario(id);
+        const armControl = document.getElementById(`armInstance${id}`);
+        if (armControl instanceof HTMLInputElement) {
+          armControl.checked = false;
+        }
+      }
+      writeArmed([]);
+    });
+
+    const instancesGrid = document.getElementById("instancesGrid");
+    const armedIds = readArmed();
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      instancesGrid?.append(createCard(id, scenario));
+
+      const armControl = document.getElementById(`armInstance${id}`);
+      const preCode = document.getElementById(`preActionOnScrollCode${id}`);
+      const tools = armControl?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (armControl instanceof HTMLInputElement) {
+        armControl.checked = armedIds.includes(id);
+        armControl.addEventListener("change", () => {
+          setArmed(id, armControl.checked);
+          destroyScenario(id);
+        });
+      }
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(actionOnScrollSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    for (const id of armedIds) {
+      runScenario(id);
+    }
+
+    window.__modalsActionOnScroll = { activeModals, scenarios };
+  </script>
+</body>
+</html>

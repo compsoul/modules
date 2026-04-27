@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ActionAfter Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | actionAfter</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">actionAfter</span>. This plugin schedules modal actions (<span class="ui-mono">open</span>, <span class="ui-mono">close</span>, <span class="ui-mono">destroy</span>) after configured <span class="ui-mono">delay</span> values and optional <span class="ui-mono">when</span> state filters.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">ActionAfter Instances</h2>
+      <p class="ui-section-subtitle">Each checkbox arms one scenario. Select tests, refresh the page, and only selected scenarios will create modal instances and schedule their timers.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllActionAfter" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const activeModals = new Set();
+    const scenarioInstances = new Map();
+    const actionAfterSourceById = {};
+    const armedStorageKey = "modal:actionAfter:armed";
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const closeByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+            ],
+          },
+        ],
+      },
+    };
+
+    function actionAfterContent(title, rows = []) {
+      return `<h3 class="ui-content-title">${title}</h3><ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul><div class="ui-row ui-mt-sm"><button type="button" class="ui-btn ui-btn-tech">Focusable control</button><input class="ui-input" aria-label="Action after input" placeholder="Timer-controlled modal" /></div>`;
+    }
+
+    function baseSettings(rules, extraFeatures = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByClick,
+          ...closeByEsc,
+          actionAfter: {
+            enabled: true,
+            rules,
+          },
+          ...extraFeatures,
+        },
+      };
+    }
+
+    function readArmed() {
+      try {
+        return JSON.parse(sessionStorage.getItem(armedStorageKey) ?? "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function writeArmed(ids) {
+      sessionStorage.setItem(armedStorageKey, JSON.stringify([...new Set(ids)]));
+    }
+
+    function setArmed(id, armed) {
+      const ids = readArmed().filter((entry) => entry !== id);
+      if (armed) ids.push(id);
+      writeArmed(ids);
+    }
+
+    const scenarios = {
+      Custom: {
+        label: "Custom default",
+        settings: baseSettings([{ do: "open", delay: 800, when: "closed" }]),
+        content: actionAfterContent("ActionAfter custom default", [
+          "Goal: baseline actionAfter behavior.",
+          "Expected: modal opens after about 800 ms.",
+        ]),
+      },
+      T1: {
+        label: "T1 disabled",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionAfter: {
+              enabled: false,
+              rules: [
+                {
+                  do: "open",
+                  delay: 300,
+                  when: "closed",
+                },
+              ],
+            },
+          },
+        },
+        content: actionAfterContent("ActionAfter T1: disabled", [
+          "Goal: confirm disabled plugin does not schedule timers.",
+          "Expected: modal does not open automatically.",
+        ]),
+      },
+      T2: {
+        label: "T2 default",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionAfter: {
+              enabled: true,
+            },
+          },
+        },
+        content: actionAfterContent("ActionAfter T2: default", [
+          "Goal: validate default rules from modal/defaults.js.",
+          "Expected: default action opens the modal after the configured delay.",
+        ]),
+      },
+      T3: {
+        label: "T3 short open",
+        settings: baseSettings([{ do: "open", delay: 200, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T3: short open", [
+          "Goal: verify a short open timer.",
+          "Expected: modal opens after about 200 ms.",
+        ]),
+      },
+      T4: {
+        label: "T4 rwd variants",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionAfter: {
+              enabled: true,
+              rules: [
+                {
+                  do: "open",
+                  delay: 700,
+                  when: "closed",
+                },
+              ],
+            },
+            titleBlinkOnAway: {
+              enabled: true,
+              options: {
+                title: "ActionAfter T4 | desktop delay",
+                interval: 900,
+              },
+            },
+          },
+          rwd: {
+            "(max-width: 767px)": {
+              features: {
+                actionAfter: {
+                  enabled: true,
+                  rules: [
+                    {
+                      do: "open",
+                      delay: 100,
+                      when: "closed",
+                    },
+                  ],
+                },
+                titleBlinkOnAway: {
+                  enabled: true,
+                  options: {
+                    title: "ActionAfter T4 | mobile quick",
+                    interval: 700,
+                  },
+                },
+              },
+            },
+          },
+        },
+        content: actionAfterContent("ActionAfter T4: RWD variants", [
+          "Goal: verify responsive timer rules.",
+          "Mobile opens after about 100 ms; larger viewports after about 700 ms.",
+        ]),
+      },
+      T5: {
+        label: "T5 full stack",
+        settings: baseSettings([{ do: "open", delay: 500, when: "closed" }], {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionAfter T5 active",
+              interval: 1000,
+            },
+          },
+        }),
+        content: actionAfterContent("ActionAfter T5: full stack", [
+          "Goal: validate actionAfter with common modal plugins enabled.",
+          "Expected: timer opens the modal and normal close paths stay stable.",
+        ]),
+      },
+      T6: {
+        label: "T6 reentry",
+        settings: baseSettings([{ do: "open", delay: 180, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T6: reentry", [
+          "Goal: detect stale timers under repeated recreate cycles.",
+          "Scenario: toggle this checkbox and refresh several times.",
+          "Expected: each fresh instance schedules at most one timer.",
+        ]),
+      },
+      T7: {
+        label: "T7 dual stack",
+        settings: baseSettings([{ do: "open", delay: 300, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T7: dual stack", [
+          "Goal: two independent instances schedule actionAfter timers.",
+          "Expected: both modals can open from separate timers and remain independently closable.",
+        ]),
+      },
+      T8: {
+        label: "T8 destroy before timer",
+        settings: baseSettings([{ do: "open", delay: 500, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T8: destroy before timer", [
+          "Goal: verify destroy clears the pending timer.",
+          "Scenario: instance is destroyed after 150 ms.",
+          "Expected: modal does not open from the old timer.",
+        ]),
+      },
+      T9: {
+        label: "T9 open action",
+        settings: baseSettings([{ do: "open", delay: 300, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T9: do open", [
+          "Goal: verify do=open.",
+          "Expected: modal opens after about 300 ms.",
+        ]),
+      },
+      T10: {
+        label: "T10 close while open",
+        settings: baseSettings([{ do: "close", delay: 700, when: "open" }]),
+        content: actionAfterContent("ActionAfter T10: do close while open", [
+          "Goal: document current timer cleanup behavior for do=close.",
+          "Scenario: test opens the modal manually after 100 ms.",
+          "Expected with current plugin: open event clears the pending timer, so auto-close does not fire.",
+        ]),
+        afterCreate(modal) {
+          setTimeout(() => modal.open(), 100);
+        },
+      },
+      T11: {
+        label: "T11 destroy action",
+        settings: baseSettings([{ do: "destroy", delay: 400 }]),
+        content: actionAfterContent("ActionAfter T11: do destroy", [
+          "Goal: verify do=destroy.",
+          "Expected: instance is destroyed after about 400 ms and never opens.",
+        ]),
+      },
+      T12: {
+        label: "T12 when closed",
+        settings: baseSettings([{ do: "open", delay: 350, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T12: when closed", [
+          "Goal: verify when=closed allows opening while closed.",
+          "Expected: modal opens after about 350 ms.",
+        ]),
+      },
+      T13: {
+        label: "T13 when open",
+        settings: baseSettings([{ do: "open", delay: 350, when: "open" }]),
+        content: actionAfterContent("ActionAfter T13: when open", [
+          "Goal: verify when=open blocks opening while closed.",
+          "Expected: modal does not open because the instance is closed when the timer fires.",
+        ]),
+      },
+      T14: {
+        label: "T14 invalid rules",
+        settings: baseSettings([{ do: "boom", delay: 250 }, { do: "open", delay: -1 }]),
+        content: actionAfterContent("ActionAfter T14: invalid rules", [
+          "Goal: verify invalid do and invalid delay warnings.",
+          "Expected: debug warnings appear and no valid timer opens the modal.",
+        ]),
+      },
+      T15: {
+        label: "T15 fallback",
+        settings: baseSettings([{ do: "boom", delay: 250 }, null, { do: "open", delay: 450, when: "closed" }]),
+        content: actionAfterContent("ActionAfter T15: fallback", [
+          "Goal: verify bad rules do not block a later valid rule.",
+          "Expected: warnings appear, then the valid fallback opens the modal.",
+        ]),
+      },
+    };
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      actionAfterSourceById[id] = scenario.settings;
+    }
+
+    function createCard(id, scenario) {
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      article.innerHTML = `
+        <label><input type="checkbox" id="armInstance${id}" /> <span>${scenario.label}</span></label>
+        <div class="ui-card-tools">
+          <label class="ui-btn-mini" for="showActionAfterCode${id}">Show code</label>
+        </div>
+        <input type="checkbox" class="ui-toggle" id="showActionAfterCode${id}" />
+        <div class="ui-code-wrap"><pre id="preActionAfterCode${id}" class="ui-code ui-mono"></pre></div>
+      `;
+      return article;
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(preCode.textContent ?? "");
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    function rememberScenarioInstance(id, modal) {
+      activeModals.add(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      list.push(modal);
+      scenarioInstances.set(id, list);
+    }
+
+    function forgetScenarioInstance(id, modal) {
+      activeModals.delete(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      const next = list.filter((entry) => entry !== modal);
+      if (next.length > 0) {
+        scenarioInstances.set(id, next);
+      } else {
+        scenarioInstances.delete(id);
+      }
+    }
+
+    function destroyScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      for (const modal of list) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+      }
+      scenarioInstances.delete(id);
+    }
+
+    async function createScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const modal = await Modal.create(scenario.settings);
+      modal.setContent(scenario.content);
+      rememberScenarioInstance(id, modal);
+      scenario.afterCreate?.(modal);
+      return modal;
+    }
+
+    async function runScenario(id) {
+      if (id === "T7") {
+        await createScenario("T7");
+        setTimeout(() => {
+          if (readArmed().includes("T7")) {
+            createScenario("T7");
+          }
+        }, 120);
+        return;
+      }
+
+      if (id === "T8") {
+        const modal = await createScenario("T8");
+        setTimeout(() => {
+          try {
+            modal?.destroy();
+            forgetScenarioInstance("T8", modal);
+          } catch {}
+        }, 150);
+        return;
+      }
+
+      await createScenario(id);
+    }
+
+    document.getElementById("closeAllActionAfter")?.addEventListener("click", () => {
+      for (const id of Object.keys(scenarios)) {
+        destroyScenario(id);
+        const armControl = document.getElementById(`armInstance${id}`);
+        if (armControl instanceof HTMLInputElement) {
+          armControl.checked = false;
+        }
+      }
+      writeArmed([]);
+    });
+
+    const instancesGrid = document.getElementById("instancesGrid");
+    const armedIds = readArmed();
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      instancesGrid?.append(createCard(id, scenario));
+
+      const armControl = document.getElementById(`armInstance${id}`);
+      const preCode = document.getElementById(`preActionAfterCode${id}`);
+      const tools = armControl?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (armControl instanceof HTMLInputElement) {
+        armControl.checked = armedIds.includes(id);
+        armControl.addEventListener("change", () => {
+          setArmed(id, armControl.checked);
+          destroyScenario(id);
+        });
+      }
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(actionAfterSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    for (const id of armedIds) {
+      runScenario(id);
+    }
+
+    window.__modalsActionAfter = { activeModals, scenarios };
+  </script>
+</body>
+</html>

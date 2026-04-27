@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StorageGate Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | storageGate</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">storageGate</span>. This plugin guards modal events such as <span class="ui-mono">guard:open</span>, <span class="ui-mono">guard:close</span>, and <span class="ui-mono">guard:destroy</span> using <span class="ui-mono">localStorage</span> or <span class="ui-mono">sessionStorage</span> key presence.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">StorageGate Instances</h2>
+      <p class="ui-section-subtitle">Use each card controls to set or clear the storage key, then run the modal action. Blocked actions are reported in the small status line under each card.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllStorageGate" class="ui-btn ui-btn-neutral">Close all</button>
+        <button id="clearAllStorageGate" class="ui-btn ui-btn-neutral">Clear test storage</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const activeModals = new Set();
+    const scenarioInstances = new Map();
+    const storageGateSourceById = {};
+    const storagePrefix = "modal:storageGate:";
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const closeByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+            ],
+          },
+        ],
+      },
+    };
+
+    function gateContent(title, rows = []) {
+      return `<h3 class="ui-content-title">${title}</h3><ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul><div class="ui-row ui-mt-sm"><button type="button" class="ui-btn ui-btn-tech">Focusable control</button><input class="ui-input" aria-label="Storage gate input" placeholder="Try close / destroy after changing key" /></div>`;
+    }
+
+    function keyFor(id) {
+      return `${storagePrefix}${id}`;
+    }
+
+    function storageFor(type = "local") {
+      return type === "session" ? sessionStorage : localStorage;
+    }
+
+    function baseSettings(rules, extraFeatures = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByClick,
+          ...closeByEsc,
+          storageGate: {
+            enabled: true,
+            rules,
+          },
+          ...extraFeatures,
+        },
+      };
+    }
+
+    function openGate(id, overrides = {}) {
+      return {
+        key: keyFor(id),
+        storage: overrides.storage ?? "local",
+        allowWhen: overrides.allowWhen ?? "missing",
+        event: overrides.event ?? "guard:open",
+      };
+    }
+
+    const scenarios = {
+      Custom: {
+        label: "Custom default",
+        key: keyFor("Custom"),
+        storage: "local",
+        settings: baseSettings([openGate("Custom")]),
+        content: gateContent("StorageGate custom default", [
+          "Goal: baseline guard:open behavior.",
+          "Expected: missing local key allows open; present key blocks open.",
+        ]),
+      },
+      T1: {
+        label: "T1 disabled",
+        key: keyFor("T1"),
+        storage: "local",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            storageGate: {
+              enabled: false,
+              rules: [openGate("T1")],
+            },
+          },
+        },
+        content: gateContent("StorageGate T1: disabled", [
+          "Goal: confirm disabled plugin binds no guards.",
+          "Expected: open works even when the local key is present.",
+        ]),
+      },
+      T2: {
+        label: "T2 no rules",
+        key: keyFor("T2"),
+        storage: "local",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            storageGate: {
+              enabled: true,
+            },
+          },
+        },
+        content: gateContent("StorageGate T2: enabled without rules", [
+          "Goal: validate enabled plugin with no rules.",
+          "Expected: debug says no rules and no action is blocked.",
+        ]),
+      },
+      T3: {
+        label: "T3 allow missing",
+        key: keyFor("T3"),
+        storage: "local",
+        settings: baseSettings([openGate("T3", { allowWhen: "missing" })]),
+        content: gateContent("StorageGate T3: allowWhen missing", [
+          "Goal: verify the default allowWhen mode.",
+          "Expected: clear key opens; set key blocks guard:open.",
+        ]),
+      },
+      T4: {
+        label: "T4 allow present",
+        key: keyFor("T4"),
+        storage: "local",
+        settings: baseSettings([openGate("T4", { allowWhen: "present" })]),
+        content: gateContent("StorageGate T4: allowWhen present", [
+          "Goal: invert the gate condition.",
+          "Expected: missing key blocks open; present key allows open.",
+        ]),
+      },
+      T5: {
+        label: "T5 session key",
+        key: keyFor("T5"),
+        storage: "session",
+        settings: baseSettings([openGate("T5", { storage: "session" })]),
+        content: gateContent("StorageGate T5: sessionStorage", [
+          "Goal: verify sessionStorage lookup.",
+          "Expected: missing session key allows open; present session key blocks open.",
+        ]),
+      },
+      T6: {
+        label: "T6 rwd variants",
+        key: keyFor("T6"),
+        storage: "local",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            titleBlinkOnAway: {
+              enabled: true,
+              options: {
+                title: "StorageGate T6 | desktop allows missing",
+                interval: 900,
+              },
+            },
+            storageGate: {
+              enabled: true,
+              rules: [openGate("T6", { allowWhen: "missing" })],
+            },
+          },
+          rwd: {
+            "(max-width: 767px)": {
+              features: {
+                titleBlinkOnAway: {
+                  enabled: true,
+                  options: {
+                    title: "StorageGate T6 | mobile allows present",
+                    interval: 700,
+                  },
+                },
+                storageGate: {
+                  enabled: true,
+                  rules: [openGate("T6", { allowWhen: "present" })],
+                },
+              },
+            },
+          },
+        },
+        content: gateContent("StorageGate T6: RWD variants", [
+          "Goal: verify responsive guard rules.",
+          "Desktop/tablet: missing key allows open. Mobile <=767: present key allows open.",
+        ]),
+      },
+      T7: {
+        label: "T7 full stack",
+        key: keyFor("T7"),
+        storage: "local",
+        settings: baseSettings([openGate("T7")], {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "StorageGate T7 active",
+              interval: 1000,
+            },
+          },
+        }),
+        content: gateContent("StorageGate T7: full stack", [
+          "Goal: validate storageGate with common modal plugins enabled.",
+          "Expected: gate blocks open only by storage state; close/focus/lock still clean up normally.",
+        ]),
+      },
+      T8: {
+        label: "T8 destroy/recreate",
+        key: keyFor("T8"),
+        storage: "local",
+        settings: baseSettings([openGate("T8")]),
+        content: gateContent("StorageGate T8: destroy/recreate", [
+          "Goal: verify guards are cleaned and rebound after recreate.",
+          "Scenario: opening destroys the instance after a short delay and recreates it.",
+        ]),
+      },
+      T9: {
+        label: "T9 dual stack",
+        key: keyFor("T9"),
+        storage: "local",
+        settings: baseSettings([openGate("T9")]),
+        content: gateContent("StorageGate T9: dual stack", [
+          "Goal: two instances share the same open gate key.",
+          "Expected: missing key opens both; present key blocks both.",
+        ]),
+      },
+      T10: {
+        label: "T10 close gate",
+        key: keyFor("T10"),
+        storage: "local",
+        settings: baseSettings([
+          {
+            key: keyFor("T10"),
+            storage: "local",
+            allowWhen: "missing",
+            event: "guard:close",
+          },
+        ]),
+        content: gateContent("StorageGate T10: guard close", [
+          "Goal: block close while the key is present.",
+          "Expected: set key, open, then close/ESC/backdrop is blocked until the key is cleared.",
+        ]),
+      },
+      T11: {
+        label: "T11 destroy gate",
+        key: keyFor("T11"),
+        storage: "local",
+        settings: baseSettings([
+          {
+            key: keyFor("T11"),
+            storage: "local",
+            allowWhen: "missing",
+            event: "guard:destroy",
+          },
+        ]),
+        content: gateContent("StorageGate T11: guard destroy", [
+          "Goal: block destroy while the key is present.",
+          "Expected: set key and press Destroy; destroy is blocked until the key is cleared.",
+        ]),
+      },
+      T12: {
+        label: "T12 multi event",
+        key: keyFor("T12"),
+        storage: "local",
+        settings: baseSettings([
+          {
+            key: keyFor("T12"),
+            storage: "local",
+            allowWhen: "missing",
+            event: ["guard:open", "guard:close"],
+          },
+        ]),
+        content: gateContent("StorageGate T12: multiple guard events", [
+          "Goal: bind one rule to multiple guard events.",
+          "Expected: present key blocks open and close; missing key allows both.",
+        ]),
+      },
+      T13: {
+        label: "T13 invalid storage",
+        key: keyFor("T13"),
+        storage: "local",
+        settings: baseSettings([
+          {
+            key: keyFor("T13"),
+            storage: "cookie",
+            allowWhen: "missing",
+            event: "guard:open",
+          },
+        ]),
+        content: gateContent("StorageGate T13: invalid storage", [
+          "Goal: verify invalid storage warning.",
+          "Expected: warning appears and no gate is bound.",
+        ]),
+      },
+      T14: {
+        label: "T14 invalid rules",
+        key: keyFor("T14"),
+        storage: "local",
+        settings: baseSettings([
+          null,
+          {
+            key: "",
+            storage: "local",
+            event: "guard:open",
+          },
+          {
+            key: keyFor("T14"),
+            storage: "local",
+            event: "",
+          },
+        ]),
+        content: gateContent("StorageGate T14: invalid rules", [
+          "Goal: verify invalid config, key, and event warnings.",
+          "Expected: no gate is bound and open is not blocked.",
+        ]),
+      },
+      T15: {
+        label: "T15 fallback rule",
+        key: keyFor("T15"),
+        storage: "local",
+        settings: baseSettings([
+          {
+            key: "",
+            storage: "local",
+            event: "guard:open",
+          },
+          openGate("T15", { allowWhen: "missing" }),
+        ]),
+        content: gateContent("StorageGate T15: fallback valid rule", [
+          "Goal: verify bad rules do not block a later valid gate.",
+          "Expected: warnings appear, then the valid missing-key open gate still works.",
+        ]),
+      },
+    };
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      storageGateSourceById[id] = scenario.settings;
+    }
+
+    function createCard(id, scenario) {
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      article.innerHTML = `
+        <button id="openInstance${id}" class="ui-btn ui-btn-tech ui-btn-block-start">${scenario.label}</button>
+        <small id="statusStorageGate${id}" class="ui-card-hint">Key: ${scenario.storage}:${scenario.key}</small>
+        <div class="ui-card-tools">
+          <label class="ui-btn-mini" for="showStorageGateCode${id}">Show code</label>
+        </div>
+        <div class="ui-card-tools">
+          <button type="button" class="ui-btn-mini" id="setStorageGate${id}">Set key</button>
+          <button type="button" class="ui-btn-mini" id="clearStorageGate${id}">Clear key</button>
+          <button type="button" class="ui-btn-mini" id="destroyStorageGate${id}">Destroy</button>
+        </div>
+        <input type="checkbox" class="ui-toggle" id="showStorageGateCode${id}" />
+        <div class="ui-code-wrap"><pre id="preStorageGateCode${id}" class="ui-code ui-mono"></pre></div>
+      `;
+      return article;
+    }
+
+    function setStatus(id, text) {
+      const status = document.getElementById(`statusStorageGate${id}`);
+      if (status) status.textContent = text;
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(preCode.textContent ?? "");
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    function rememberScenarioInstance(id, modal) {
+      activeModals.add(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      list.push(modal);
+      scenarioInstances.set(id, list);
+    }
+
+    function forgetScenarioInstance(id, modal) {
+      activeModals.delete(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      const next = list.filter((entry) => entry !== modal);
+      if (next.length > 0) {
+        scenarioInstances.set(id, next);
+      } else {
+        scenarioInstances.delete(id);
+      }
+    }
+
+    function wireStatus(id, modal) {
+      modal.subscribe("open", () => setStatus(id, "Opened"));
+      modal.subscribe("close", () => setStatus(id, "Closed"));
+      modal.subscribe("destroy", () => setStatus(id, "Destroyed"));
+      modal.subscribe("open:blocked", () => setStatus(id, "Blocked: guard:open"));
+      modal.subscribe("close:blocked", () => setStatus(id, "Blocked: guard:close"));
+      modal.subscribe("destroy:blocked", () => setStatus(id, "Blocked: guard:destroy"));
+    }
+
+    async function createScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const modal = await Modal.create(scenario.settings);
+      modal.setContent(scenario.content);
+      wireStatus(id, modal);
+      rememberScenarioInstance(id, modal);
+      return modal;
+    }
+
+    function destroyScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      for (const modal of list) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+      }
+      scenarioInstances.delete(id);
+    }
+
+    async function ensureScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      const current = list.find((modal) => !modal.destroyed);
+      if (current) return current;
+      return createScenario(id);
+    }
+
+    async function recreateScenario(id) {
+      destroyScenario(id);
+      return createScenario(id);
+    }
+
+    async function openScenario(id) {
+      if (id === "T9") {
+        const existing = scenarioInstances.get("T9") ?? [];
+        if (existing.filter((modal) => !modal.destroyed).length < 2) {
+          destroyScenario("T9");
+          await createScenario("T9");
+          await createScenario("T9");
+        }
+
+        const list = scenarioInstances.get("T9") ?? [];
+        for (const modal of list) {
+          try {
+            await modal.open();
+          } catch {}
+        }
+        return;
+      }
+
+      const modal = await ensureScenario(id);
+      if (!modal) return;
+
+      await modal.open();
+
+      if (id === "T8" && modal.isOpen) {
+        setTimeout(async () => {
+          try {
+            modal.destroy();
+            forgetScenarioInstance("T8", modal);
+          } catch {}
+          await createScenario("T8");
+          setStatus("T8", "Destroyed and recreated");
+        }, 150);
+      }
+    }
+
+    async function destroyByButton(id) {
+      const modal = await ensureScenario(id);
+      if (!modal) return;
+
+      try {
+        modal.destroy();
+      } catch {}
+
+      if (modal.destroyed) {
+        forgetScenarioInstance(id, modal);
+      }
+    }
+
+    function setScenarioKey(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return;
+
+      storageFor(scenario.storage).setItem(scenario.key, "1");
+      setStatus(id, `Set ${scenario.storage}:${scenario.key}`);
+    }
+
+    function clearScenarioKey(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return;
+
+      storageFor(scenario.storage).removeItem(scenario.key);
+      setStatus(id, `Cleared ${scenario.storage}:${scenario.key}`);
+    }
+
+    function clearAllStorageGateKeys() {
+      for (const scenario of Object.values(scenarios)) {
+        try {
+          storageFor(scenario.storage).removeItem(scenario.key);
+        } catch {}
+      }
+    }
+
+    const instancesGrid = document.getElementById("instancesGrid");
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      instancesGrid?.append(createCard(id, scenario));
+
+      const openButton = document.getElementById(`openInstance${id}`);
+      const setButton = document.getElementById(`setStorageGate${id}`);
+      const clearButton = document.getElementById(`clearStorageGate${id}`);
+      const destroyButton = document.getElementById(`destroyStorageGate${id}`);
+      const preCode = document.getElementById(`preStorageGateCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      openButton?.addEventListener("click", () => openScenario(id));
+      setButton?.addEventListener("click", () => setScenarioKey(id));
+      clearButton?.addEventListener("click", () => clearScenarioKey(id));
+      destroyButton?.addEventListener("click", () => destroyByButton(id));
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(storageGateSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    document.getElementById("closeAllStorageGate")?.addEventListener("click", () => {
+      for (const modal of Array.from(activeModals)) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    });
+
+    document.getElementById("clearAllStorageGate")?.addEventListener("click", () => {
+      clearAllStorageGateKeys();
+      for (const id of Object.keys(scenarios)) {
+        setStatus(id, "Test storage cleared");
+      }
+    });
+
+    for (const id of Object.keys(scenarios)) {
+      await createScenario(id);
+    }
+
+    window.__modalsStorageGate = { activeModals, scenarios };
+  </script>
+</body>
+</html>

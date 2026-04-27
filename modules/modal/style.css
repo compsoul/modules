@@ -1,0 +1,159 @@
+@layer module.modal {
+  [class*="module-modal"] {
+    --module: "modal";
+  }
+
+  [class*="module-modal"][hidden] {
+    display: none !important;
+  }
+
+  [class*="module-modal"] .modal-container {
+    --animation-duration: var(--_animation-duration, 0.2s);
+    --animation-timing-function: var(--_animation-timing-function, linear);
+    --grid: var(--_grid, 100px);
+    --modal-color-backdrop: var(--_modal-color-backdrop, var(--_color-first_, 6, 16, 17));
+    --modal-color-close-bg-hover: var(--_modal-color-close-bg-hover, var(--_color-border, 200, 209, 210));
+    --modal-color-close-bg: var(--_modal-color-close-bg, var(--_color-main, 230, 238, 239));
+    --modal-color-close-text: var(--_modal-color-close-text, var(--_color-first_, 6, 16, 17));
+    --modal-color-surface: var(--_modal-color-surface, var(--_color-first, 255, 255, 255));
+    --modal-color-text: var(--_modal-color-text, var(--_color-first_, 6, 16, 17));
+    --modal-shadow: var(--_modal-shadow, 0 20px 50px rgba( 0, 0, 0, 0.38 ));
+    --rem: var(--_rem, 100px);
+  }
+
+  [class*="module-modal"] {
+    display: grid;
+    inset: 0;
+    place-items: center;
+    position: fixed;
+    z-index: 9999;
+  }
+
+  [class*="module-modal"] .modal-container {
+    box-sizing: border-box;
+    display: grid;
+    height: 100%;
+    padding: min( calc( 0.18 * var(--rem) ), 1rem );
+    place-items: center;
+    position: relative;
+    width: 100%;
+  }
+
+  [class*="module-modal"] .modal-backdrop {
+    background: rgba( var(--modal-color-backdrop), 0.48 );
+    inset: 0;
+    position: absolute;
+  }
+
+  [class*="module-modal"] .modal-panel {
+    background: rgb( var(--modal-color-surface) );
+    border-radius: calc( 0.16 * var(--rem) );
+    box-shadow: var(--modal-shadow);
+    box-sizing: border-box;
+    color: rgb( var(--modal-color-text) );
+    padding: min( calc( 0.24 * var(--rem) ), 1.5rem );
+    position: relative;
+    width: min( 100%, calc( 6.40 * var(--rem) ) );
+    z-index: 1;
+  }
+
+  [class*="module-modal"] .modal-content {
+    font-size: min( calc( 0.14 * var(--rem) ), 0.875rem );
+    line-height: 1.6;
+  }
+
+  [class*="module-modal"] .modal-close {
+    align-items: center;
+    background: rgb( var(--modal-color-close-bg) );
+    border: 0;
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: rgb( var(--modal-color-close-text) );
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 20px;
+    font-weight: 700;
+    height: min( calc( 0.36 * var(--rem) ), 2.25rem );
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+    right: min( calc( 0.12 * var(--rem) ), 0.75rem );
+    top: min( calc( 0.12 * var(--rem) ), 0.75rem );
+    transition: background var(--animation-duration) var(--animation-timing-function);
+    width: min( calc( 0.36 * var(--rem) ), 2.25rem );
+  }
+
+  [class*="module-modal"] .modal-close:focus,
+  [class*="module-modal"] .modal-close:hover {
+    background: rgb( var(--modal-color-close-bg-hover) );
+  }
+
+  [class*="module-modal"] .modal-close::before {
+    content: "\00D7";
+  }
+
+  [class*="module-modal"] .modal-close,
+  [class*="module-modal"] .modal-panel {
+    opacity: 1;
+  }
+
+  @keyframes modalPanelHide {
+    from {
+      opacity: 1;
+      transform: translateY( 0 ) scale( 1 );
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY( 28px ) scale( 0.96 );
+    }
+  }
+
+  @keyframes modalPanelShow {
+    from {
+      opacity: 0;
+      transform: translateY( 40px ) scale( 0.94 );
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY( 0 ) scale( 1 );
+    }
+  }
+
+  @keyframes modalRootHide {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes modalRootShow {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  [class*="module-modal"].modal-animate-hide {
+    animation: modalRootHide 320ms ease-in both;
+  }
+
+  [class*="module-modal"] .modal-panel.modal-animate-panel-hide {
+    animation: modalPanelHide 480ms ease both;
+  }
+
+  [class*="module-modal"] .modal-panel.modal-animate-panel-show {
+    animation: modalPanelShow 620ms cubic-bezier( 0.2, 0.8, 0.2, 1 ) both;
+  }
+
+  [class*="module-modal"].modal-animate-show {
+    animation: modalRootShow 360ms ease-out both;
+  }
+}

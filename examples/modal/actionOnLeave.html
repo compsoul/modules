@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ActionOnLeave Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | actionOnLeave</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">actionOnLeave</span>. This plugin arms modal actions (<span class="ui-mono">open</span>, <span class="ui-mono">close</span>, <span class="ui-mono">destroy</span>) and runs them when the pointer leaves the document viewport.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">ActionOnLeave Instances</h2>
+      <p class="ui-section-subtitle">Each checkbox arms one scenario. Select tests, refresh the page, then move the pointer out of the browser viewport to trigger <span class="ui-mono">mouseout</span> with no <span class="ui-mono">relatedTarget</span>.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllActionOnLeave" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const activeModals = new Set();
+    const scenarioInstances = new Map();
+    const actionOnLeaveSourceById = {};
+    const armedStorageKey = "modal:actionOnLeave:armed";
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const closeByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+            ],
+          },
+        ],
+      },
+    };
+
+    function actionOnLeaveContent(title, rows = []) {
+      return `<h3 class="ui-content-title">${title}</h3><ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul><div class="ui-row ui-mt-sm"><button type="button" class="ui-btn ui-btn-tech">Focusable control</button><input class="ui-input" aria-label="Action on leave input" placeholder="Move pointer out again" /></div>`;
+    }
+
+    function baseSettings(rules, extraFeatures = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByClick,
+          ...closeByEsc,
+          actionOnLeave: {
+            enabled: true,
+            rules,
+          },
+          ...extraFeatures,
+        },
+      };
+    }
+
+    function readArmed() {
+      try {
+        return JSON.parse(sessionStorage.getItem(armedStorageKey) ?? "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function writeArmed(ids) {
+      sessionStorage.setItem(armedStorageKey, JSON.stringify([...new Set(ids)]));
+    }
+
+    function setArmed(id, armed) {
+      const ids = readArmed().filter((entry) => entry !== id);
+      if (armed) ids.push(id);
+      writeArmed(ids);
+    }
+
+    const scenarios = {
+      Custom: {
+        label: "Custom default",
+        settings: baseSettings([{ do: "open", delay: 200, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave custom default", [
+          "Goal: baseline actionOnLeave behavior.",
+          "After refresh, wait about 200 ms, then move the pointer outside the viewport.",
+          "Expected: modal opens once.",
+        ]),
+      },
+      T1: {
+        label: "T1 disabled",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionOnLeave: {
+              enabled: false,
+              rules: [
+                {
+                  do: "open",
+                  delay: 0,
+                  once: true,
+                  when: "closed",
+                },
+              ],
+            },
+          },
+        },
+        content: actionOnLeaveContent("ActionOnLeave T1: disabled", [
+          "Goal: confirm disabled plugin does not bind document mouseout.",
+          "Expected: leaving the viewport does not open the modal.",
+        ]),
+      },
+      T2: {
+        label: "T2 default",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionOnLeave: {
+              enabled: true,
+            },
+          },
+        },
+        content: actionOnLeaveContent("ActionOnLeave T2: default", [
+          "Goal: validate default rules from modal/defaults.js.",
+          "Expected: first viewport leave opens the modal.",
+        ]),
+      },
+      T3: {
+        label: "T3 immediate open",
+        settings: baseSettings([{ do: "open", delay: 0, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T3: immediate open", [
+          "Goal: verify immediate arming.",
+          "Expected: leaving the viewport opens once.",
+        ]),
+      },
+      T4: {
+        label: "T4 rwd variants",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            actionOnLeave: {
+              enabled: true,
+              rules: [
+                {
+                  do: "open",
+                  delay: 600,
+                  once: true,
+                  when: "closed",
+                },
+              ],
+            },
+            titleBlinkOnAway: {
+              enabled: true,
+              options: {
+                title: "ActionOnLeave T4 | desktop delay",
+                interval: 900,
+              },
+            },
+          },
+          rwd: {
+            "(max-width: 767px)": {
+              features: {
+                actionOnLeave: {
+                  enabled: true,
+                  rules: [
+                    {
+                      do: "open",
+                      delay: 0,
+                      once: true,
+                      when: "closed",
+                    },
+                  ],
+                },
+                titleBlinkOnAway: {
+                  enabled: true,
+                  options: {
+                    title: "ActionOnLeave T4 | mobile immediate",
+                    interval: 700,
+                  },
+                },
+              },
+            },
+          },
+        },
+        content: actionOnLeaveContent("ActionOnLeave T4: RWD variants", [
+          "Goal: verify responsive rules.",
+          "Mobile arms immediately; larger viewports arm after about 600 ms.",
+        ]),
+      },
+      T5: {
+        label: "T5 full stack",
+        settings: baseSettings([{ do: "open", delay: 150, once: true, when: "closed" }], {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "ActionOnLeave T5 active",
+              interval: 1000,
+            },
+          },
+        }),
+        content: actionOnLeaveContent("ActionOnLeave T5: full stack", [
+          "Goal: validate actionOnLeave with common modal plugins enabled.",
+          "Expected: viewport leave opens the modal and close paths clean up normally.",
+        ]),
+      },
+      T6: {
+        label: "T6 reentry",
+        settings: baseSettings([{ do: "open", delay: 0, once: false, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T6: reentry", [
+          "Goal: verify repeatable leave handling.",
+          "Expected: close the modal, move pointer out again, and it can reopen.",
+        ]),
+      },
+      T7: {
+        label: "T7 dual stack",
+        settings: baseSettings([{ do: "open", delay: 0, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T7: dual stack", [
+          "Goal: two independent instances listen for viewport leave.",
+          "Expected: one leave can open both instances; stacking and closing should remain stable.",
+        ]),
+      },
+      T8: {
+        label: "T8 destroy before leave",
+        settings: baseSettings([{ do: "open", delay: 0, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T8: destroy before leave", [
+          "Goal: verify destroy removes the document mouseout listener.",
+          "Scenario: instance is destroyed after 150 ms.",
+          "Expected: leaving the viewport after destroy does not open a stale modal.",
+        ]),
+      },
+      T9: {
+        label: "T9 delayed arm",
+        settings: baseSettings([{ do: "open", delay: 1200, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T9: delayed arm", [
+          "Goal: verify delayed arming.",
+          "Expected: leaving before 1200 ms does nothing; leaving after delay opens the modal.",
+        ]),
+      },
+      T10: {
+        label: "T10 repeatable open",
+        settings: baseSettings([{ do: "open", delay: 0, once: false, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T10: repeatable open", [
+          "Goal: validate once=false with do=open.",
+          "Expected: each close rearms the plugin, so a later leave can open again.",
+        ]),
+      },
+      T11: {
+        label: "T11 once open",
+        settings: baseSettings([{ do: "open", delay: 0, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T11: once true", [
+          "Goal: validate single-fire behavior.",
+          "Expected: after first open and close, another viewport leave does not reopen.",
+        ]),
+      },
+      T12: {
+        label: "T12 when open",
+        hint: "Press O to open, then leave viewport to close",
+        settings: baseSettings([{ do: "close", delay: 0, once: false, when: "open" }], {
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                keys: ["Escape", "Esc"],
+                when: "open",
+              },
+              {
+                do: "open",
+                keys: ["o", "O"],
+                when: "closed",
+              },
+            ],
+          },
+        }),
+        content: actionOnLeaveContent("ActionOnLeave T12: when open", [
+          "Goal: verify when=open only allows the leave action while modal is already open.",
+          "Press O to open this modal, then leave the viewport.",
+          "Expected: leaving while open closes the modal; after close, the rule can rearm.",
+        ]),
+      },
+      T13: {
+        label: "T13 destroy action",
+        settings: baseSettings([{ do: "destroy", delay: 0, once: true }]),
+        content: actionOnLeaveContent("ActionOnLeave T13: do destroy", [
+          "Goal: verify do=destroy on viewport leave.",
+          "Expected: leaving the viewport destroys the instance and no modal opens.",
+        ]),
+      },
+      T14: {
+        label: "T14 invalid rules",
+        settings: baseSettings([{ do: "boom", delay: 0 }, { do: "open", delay: -1 }]),
+        content: actionOnLeaveContent("ActionOnLeave T14: invalid rules", [
+          "Goal: verify invalid do and invalid delay warnings.",
+          "Expected: debug warnings appear and no handler opens the modal.",
+        ]),
+      },
+      T15: {
+        label: "T15 fallback",
+        settings: baseSettings([{ do: "boom", delay: 0 }, null, { do: "open", delay: 0, once: true, when: "closed" }]),
+        content: actionOnLeaveContent("ActionOnLeave T15: fallback", [
+          "Goal: verify bad rules do not block a later valid rule.",
+          "Expected: warnings appear, then valid fallback opens the modal on viewport leave.",
+        ]),
+      },
+    };
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      actionOnLeaveSourceById[id] = scenario.settings;
+    }
+
+    function createCard(id, scenario) {
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      const hint = scenario.hint ? `<small class="ui-card-hint">${scenario.hint}</small>` : "";
+      article.innerHTML = `
+        <label><input type="checkbox" id="armInstance${id}" /> <span>${scenario.label}</span></label>
+        ${hint}
+        <div class="ui-card-tools">
+          <label class="ui-btn-mini" for="showActionOnLeaveCode${id}">Show code</label>
+        </div>
+        <input type="checkbox" class="ui-toggle" id="showActionOnLeaveCode${id}" />
+        <div class="ui-code-wrap"><pre id="preActionOnLeaveCode${id}" class="ui-code ui-mono"></pre></div>
+      `;
+      return article;
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(preCode.textContent ?? "");
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    function rememberScenarioInstance(id, modal) {
+      activeModals.add(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      list.push(modal);
+      scenarioInstances.set(id, list);
+    }
+
+    function forgetScenarioInstance(id, modal) {
+      activeModals.delete(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      const next = list.filter((entry) => entry !== modal);
+      if (next.length > 0) {
+        scenarioInstances.set(id, next);
+      } else {
+        scenarioInstances.delete(id);
+      }
+    }
+
+    function destroyScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      for (const modal of list) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+      }
+      scenarioInstances.delete(id);
+    }
+
+    async function createScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const modal = await Modal.create(scenario.settings);
+      modal.setContent(scenario.content);
+      rememberScenarioInstance(id, modal);
+      return modal;
+    }
+
+    async function runScenario(id) {
+      if (id === "T7") {
+        await createScenario("T7");
+        await createScenario("T7");
+        return;
+      }
+
+      if (id === "T8") {
+        const modal = await createScenario("T8");
+        setTimeout(() => {
+          try {
+            modal?.destroy();
+            forgetScenarioInstance("T8", modal);
+          } catch {}
+        }, 150);
+        return;
+      }
+
+      await createScenario(id);
+    }
+
+    document.getElementById("closeAllActionOnLeave")?.addEventListener("click", () => {
+      for (const id of Object.keys(scenarios)) {
+        destroyScenario(id);
+        const armControl = document.getElementById(`armInstance${id}`);
+        if (armControl instanceof HTMLInputElement) {
+          armControl.checked = false;
+        }
+      }
+      writeArmed([]);
+    });
+
+    const instancesGrid = document.getElementById("instancesGrid");
+    const armedIds = readArmed();
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      instancesGrid?.append(createCard(id, scenario));
+
+      const armControl = document.getElementById(`armInstance${id}`);
+      const preCode = document.getElementById(`preActionOnLeaveCode${id}`);
+      const tools = armControl?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (armControl instanceof HTMLInputElement) {
+        armControl.checked = armedIds.includes(id);
+        armControl.addEventListener("change", () => {
+          setArmed(id, armControl.checked);
+          destroyScenario(id);
+        });
+      }
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(actionOnLeaveSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    for (const id of armedIds) {
+      runScenario(id);
+    }
+
+    window.__modalsActionOnLeave = { activeModals, scenarios };
+  </script>
+</body>
+</html>

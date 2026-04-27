@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TitleBlinkOnAway Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | titleBlinkOnAway</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">titleBlinkOnAway</span>. This plugin alternates <span class="ui-mono">document.title</span> while the modal is open and the page is hidden or unfocused, then restores the original title on focus, close, or destroy.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">TitleBlinkOnAway Instances</h2>
+      <p class="ui-section-subtitle">Open a scenario, switch to another tab/window, then return and close. Use the status line to inspect current <span class="ui-mono">document.title</span>; visual blinking is visible in the browser tab title.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllTitleBlink" class="ui-btn ui-btn-neutral">Close all</button>
+        <button id="restoreTitleBlink" class="ui-btn ui-btn-neutral">Restore title</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    const initialTitle = document.title;
+    const activeModals = new Set();
+    const scenarioInstances = new Map();
+    const titleBlinkSourceById = {};
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const closeByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+            ],
+          },
+        ],
+      },
+    };
+
+    function blinkContent(title, rows = []) {
+      return `
+        <h3 class="ui-content-title">${title}</h3>
+        <ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech">Focusable control</button>
+          <input class="ui-input" aria-label="Title blink input" placeholder="Switch away, then return" />
+        </div>
+      `;
+    }
+
+    function baseSettings(options = {}, extraFeatures = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByClick,
+          ...closeByEsc,
+          titleBlinkOnAway: {
+            enabled: true,
+            options,
+          },
+          ...extraFeatures,
+        },
+      };
+    }
+
+    const scenarios = {
+      Custom: {
+        label: "Custom default",
+        settings: baseSettings({
+          title: "Custom modal is waiting",
+          interval: 800,
+        }),
+        content: blinkContent("TitleBlink custom default", [
+          "Goal: baseline title blinking while away.",
+          "Open, switch away, then return. Expected: tab title alternates and restores.",
+        ]),
+      },
+      T1: {
+        label: "T1 disabled",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            titleBlinkOnAway: {
+              enabled: false,
+              options: {
+                title: "This should not blink",
+                interval: 500,
+              },
+            },
+          },
+        },
+        content: blinkContent("TitleBlink T1: disabled", [
+          "Goal: confirm disabled plugin does not bind title blinking.",
+          "Expected: switching away does not change document.title.",
+        ]),
+      },
+      T2: {
+        label: "T2 default",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            titleBlinkOnAway: {
+              enabled: true,
+            },
+          },
+        },
+        content: blinkContent("TitleBlink T2: default options", [
+          "Goal: validate default options from modal/defaults.js.",
+          "Expected: default title and interval are used without custom overrides.",
+        ]),
+      },
+      T3: {
+        label: "T3 custom title",
+        settings: baseSettings({
+          title: "Come back to T3",
+          interval: 700,
+        }),
+        content: blinkContent("TitleBlink T3: custom title", [
+          "Goal: verify custom title text.",
+          "Expected: away title alternates with Come back to T3.",
+        ]),
+      },
+      T4: {
+        label: "T4 fast interval",
+        settings: baseSettings({
+          title: "T4 fast blink",
+          interval: 250,
+        }),
+        content: blinkContent("TitleBlink T4: fast interval", [
+          "Goal: verify minimum-ish interval behavior.",
+          "Expected: title alternates quickly while away.",
+        ]),
+      },
+      T5: {
+        label: "T5 slow interval",
+        settings: baseSettings({
+          title: "T5 slow blink",
+          interval: 1600,
+        }),
+        content: blinkContent("TitleBlink T5: slow interval", [
+          "Goal: verify a slower blink cadence.",
+          "Expected: title alternates more slowly while away.",
+        ]),
+      },
+      T6: {
+        label: "T6 rwd variants",
+        settings: {
+          config: {
+            target: document.body,
+          },
+          features: {
+            ...closeByClick,
+            ...closeByEsc,
+            titleBlinkOnAway: {
+              enabled: true,
+              options: {
+                title: "T6 desktop blink",
+                interval: 900,
+              },
+            },
+          },
+          rwd: {
+            "(max-width: 767px)": {
+              features: {
+                titleBlinkOnAway: {
+                  enabled: true,
+                  options: {
+                    title: "T6 mobile blink",
+                    interval: 450,
+                  },
+                },
+              },
+            },
+          },
+        },
+        content: blinkContent("TitleBlink T6: RWD variants", [
+          "Goal: verify responsive title and interval.",
+          "Desktop/tablet: T6 desktop blink. Mobile <=767: T6 mobile blink.",
+        ]),
+      },
+      T7: {
+        label: "T7 full stack",
+        settings: baseSettings(
+          {
+            title: "T7 full stack waiting",
+            interval: 800,
+          },
+          {
+            backdrop: {
+              enabled: true,
+            },
+            closeButton: {
+              enabled: true,
+            },
+            footer: {
+              enabled: true,
+            },
+            focusTrap: {
+              enabled: true,
+              options: {
+                autoFocus: true,
+                restoreFocus: true,
+              },
+            },
+            lockScroll: {
+              enabled: true,
+              options: {
+                reserveGap: true,
+              },
+            },
+          }
+        ),
+        content: blinkContent("TitleBlink T7: full stack", [
+          "Goal: validate title blinking with focusTrap and lockScroll enabled.",
+          "Expected: blink starts only while away and title restores on return/close.",
+        ]),
+      },
+      T8: {
+        label: "T8 destroy/recreate",
+        settings: baseSettings({
+          title: "T8 before destroy",
+          interval: 500,
+        }),
+        content: blinkContent("TitleBlink T8: destroy/recreate", [
+          "Goal: verify destroy cleanup restores title and rebinding works after recreate.",
+          "Scenario: open, destroy from card, then open again.",
+        ]),
+      },
+      T9: {
+        label: "T9 dual stack",
+        settings: baseSettings({
+          title: "T9 stacked modal",
+          interval: 600,
+        }),
+        content: blinkContent("TitleBlink T9: dual stack", [
+          "Goal: two modals with titleBlink active at once.",
+          "Expected: title restoration should remain stable after closing both.",
+        ]),
+      },
+      T10: {
+        label: "T10 focused no blink",
+        settings: baseSettings({
+          title: "T10 should wait",
+          interval: 500,
+        }),
+        content: blinkContent("TitleBlink T10: focused page", [
+          "Goal: confirm no blinking while the page remains focused.",
+          "Expected: keep this tab active and title should stay unchanged.",
+        ]),
+      },
+      T11: {
+        label: "T11 close restore",
+        settings: baseSettings({
+          title: "T11 restore check",
+          interval: 500,
+        }),
+        content: blinkContent("TitleBlink T11: close restores title", [
+          "Goal: verify close stops blinking and restores the base title.",
+          "Expected: after close, document.title returns to the page title.",
+        ]),
+      },
+      T12: {
+        label: "T12 empty title",
+        settings: baseSettings({
+          title: "",
+          interval: 500,
+        }),
+        content: blinkContent("TitleBlink T12: empty title", [
+          "Goal: verify empty string is accepted.",
+          "Expected: title alternates between empty string and base title while away.",
+        ]),
+      },
+      T13: {
+        label: "T13 invalid title",
+        settings: baseSettings({
+          title: 123,
+          interval: 500,
+        }),
+        content: blinkContent("TitleBlink T13: invalid title", [
+          "Goal: verify invalid title warning.",
+          "Expected: plugin does not start and title remains stable.",
+        ]),
+      },
+      T14: {
+        label: "T14 invalid interval",
+        settings: baseSettings({
+          title: "T14 invalid interval",
+          interval: 120,
+        }),
+        content: blinkContent("TitleBlink T14: invalid interval", [
+          "Goal: verify interval validation.",
+          "Expected: interval below 200 is rejected and title remains stable.",
+        ]),
+      },
+      T15: {
+        label: "T15 recreate after invalid",
+        settings: baseSettings({
+          title: "T15 valid after invalids",
+          interval: 650,
+        }),
+        content: blinkContent("TitleBlink T15: valid fallback scenario", [
+          "Goal: verify invalid scenarios do not poison later valid instances.",
+          "Expected: this modal blinks normally after T13/T14 warnings.",
+        ]),
+      },
+    };
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      titleBlinkSourceById[id] = scenario.settings;
+    }
+
+    function createCard(id, scenario) {
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      article.innerHTML = `
+        <button id="openInstance${id}" class="ui-btn ui-btn-tech ui-btn-block-start">${scenario.label}</button>
+        <small id="statusTitleBlink${id}" class="ui-card-hint">Title: ${document.title}</small>
+        <div class="ui-card-tools">
+          <label class="ui-btn-mini" for="showTitleBlinkCode${id}">Show code</label>
+        </div>
+        <div class="ui-card-tools">
+          <button type="button" class="ui-btn-mini" id="readTitleBlink${id}">Read title</button>
+          <button type="button" class="ui-btn-mini" id="destroyTitleBlink${id}">Destroy</button>
+        </div>
+        <input type="checkbox" class="ui-toggle" id="showTitleBlinkCode${id}" />
+        <div class="ui-code-wrap"><pre id="preTitleBlinkCode${id}" class="ui-code ui-mono"></pre></div>
+      `;
+      return article;
+    }
+
+    function setStatus(id, text) {
+      const status = document.getElementById(`statusTitleBlink${id}`);
+      if (status) status.textContent = text;
+    }
+
+    function readTitle(id) {
+      setStatus(id, `Title: ${document.title || "(empty)"}`);
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(preCode.textContent ?? "");
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    function rememberScenarioInstance(id, modal) {
+      activeModals.add(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      list.push(modal);
+      scenarioInstances.set(id, list);
+    }
+
+    function forgetScenarioInstance(id, modal) {
+      activeModals.delete(modal);
+
+      const list = scenarioInstances.get(id) ?? [];
+      const next = list.filter((entry) => entry !== modal);
+      if (next.length > 0) {
+        scenarioInstances.set(id, next);
+      } else {
+        scenarioInstances.delete(id);
+      }
+    }
+
+    async function createScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return null;
+
+      const modal = await Modal.create(scenario.settings);
+      modal.setContent(scenario.content);
+      modal.subscribe("open", () => setStatus(id, "Opened. Switch away to test blinking."));
+      modal.subscribe("close", () => setTimeout(() => readTitle(id), 0));
+      modal.subscribe("destroy", () => setTimeout(() => readTitle(id), 0));
+      rememberScenarioInstance(id, modal);
+      return modal;
+    }
+
+    function destroyScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      for (const modal of list) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+      }
+      scenarioInstances.delete(id);
+    }
+
+    async function ensureScenario(id) {
+      const list = scenarioInstances.get(id) ?? [];
+      const current = list.find((modal) => !modal.destroyed);
+      if (current) return current;
+      return createScenario(id);
+    }
+
+    async function openScenario(id) {
+      if (id === "T9") {
+        const existing = scenarioInstances.get("T9") ?? [];
+        if (existing.filter((modal) => !modal.destroyed).length < 2) {
+          destroyScenario("T9");
+          await createScenario("T9");
+          await createScenario("T9");
+        }
+
+        const list = scenarioInstances.get("T9") ?? [];
+        for (const modal of list) {
+          try {
+            await modal.open();
+          } catch {}
+        }
+        setStatus("T9", "Two modals opened. Switch away, then close both.");
+        return;
+      }
+
+      const modal = await ensureScenario(id);
+      if (!modal) return;
+      await modal.open();
+    }
+
+    async function destroyByButton(id) {
+      const modal = await ensureScenario(id);
+      if (!modal) return;
+
+      try {
+        modal.destroy();
+      } catch {}
+
+      if (modal.destroyed) {
+        forgetScenarioInstance(id, modal);
+      }
+
+      if (id === "T8") {
+        await createScenario("T8");
+        setStatus("T8", "Destroyed and recreated.");
+      } else {
+        setTimeout(() => readTitle(id), 0);
+      }
+    }
+
+    function restoreInitialTitle() {
+      document.title = initialTitle;
+      for (const id of Object.keys(scenarios)) {
+        readTitle(id);
+      }
+    }
+
+    const instancesGrid = document.getElementById("instancesGrid");
+
+    for (const [id, scenario] of Object.entries(scenarios)) {
+      instancesGrid?.append(createCard(id, scenario));
+
+      const openButton = document.getElementById(`openInstance${id}`);
+      const readButton = document.getElementById(`readTitleBlink${id}`);
+      const destroyButton = document.getElementById(`destroyTitleBlink${id}`);
+      const preCode = document.getElementById(`preTitleBlinkCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      openButton?.addEventListener("click", () => openScenario(id));
+      readButton?.addEventListener("click", () => readTitle(id));
+      destroyButton?.addEventListener("click", () => destroyByButton(id));
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(titleBlinkSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    document.getElementById("closeAllTitleBlink")?.addEventListener("click", () => {
+      for (const modal of Array.from(activeModals)) {
+        try {
+          modal.close();
+        } catch {}
+      }
+      setTimeout(restoreInitialTitle, 0);
+    });
+
+    document.getElementById("restoreTitleBlink")?.addEventListener("click", restoreInitialTitle);
+
+    window.addEventListener("focus", () => {
+      setTimeout(() => {
+        for (const id of Object.keys(scenarios)) {
+          readTitle(id);
+        }
+      }, 0);
+    });
+
+    for (const id of Object.keys(scenarios)) {
+      await createScenario(id);
+      readTitle(id);
+    }
+
+    window.__modalsTitleBlinkOnAway = { activeModals, scenarios };
+  </script>
+</body>
+</html>

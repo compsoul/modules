@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESM Modal Integration Testbed</title>
+  <link rel="stylesheet" href="./ui.css" />
+  <link rel="stylesheet" href="../modules/modal/style.css" />
+  <style>
+    .test-dashboard {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .test-status {
+      color: rgb(var(--ui-muted));
+      font-size: 0.78rem;
+      line-height: 1.35;
+      min-height: 1.35em;
+    }
+
+    .test-note {
+      color: rgb(var(--ui-muted));
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .test-pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgb(var(--ui-border) / 0.8);
+      border-radius: 999px;
+      color: rgb(var(--ui-muted));
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 5px 8px;
+    }
+
+    .test-spacer {
+      min-height: 125vh;
+    }
+  </style>
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal Integration Testbed</h1>
+      <p class="ui-muted">Main test page for real modal use cases and plugin conflict scenarios. The first section covers practical product patterns. The following sections intentionally combine plugins to catch lifecycle, storage, focus, scroll, animation, and event conflicts.</p>
+      <div class="ui-row">
+        <button id="closeAll" class="ui-btn ui-btn-neutral">Close all</button>
+        <button id="destroyAll" class="ui-btn ui-btn-neutral">Destroy dynamic</button>
+        <button id="clearStorage" class="ui-btn ui-btn-neutral">Clear test storage</button>
+        <button id="restoreTitle" class="ui-btn ui-btn-neutral">Restore title</button>
+      </div>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">Real Product Flows</h2>
+      <p class="ui-section-subtitle">Practical examples first. These cards are written directly in HTML and the matching JS below creates clean modal instances that are easy to copy.</p>
+      <div id="realGrid" class="test-dashboard">
+        <article class="ui-card">
+          <button id="run-googleConsent" class="ui-btn ui-btn-tech ui-btn-block-start">Google Consent Mode</button>
+          <small id="status-googleConsent" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">storageGate</span>
+            <span class="test-pill">storageOn</span>
+            <span class="test-pill">consent</span>
+          </div>
+          <p class="test-note">Consent modal with analytics, marketing, and personalization choices. Save writes local storage and blocks future opens.</p>
+          <div class="ui-card-tools">
+            <button id="clear-googleConsent" type="button" class="ui-btn-mini">Clear consent</button>
+            <button id="read-googleConsent" type="button" class="ui-btn-mini">Read consent</button>
+          </div>
+        </article>
+
+        <article class="ui-card">
+          <button id="run-cookies" class="ui-btn ui-btn-tech ui-btn-block-start">Cookie consent</button>
+          <small id="status-cookies" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">storageGate</span>
+            <span class="test-pill">storageOn</span>
+          </div>
+          <p class="test-note">Simple cookie banner. Accept writes local storage and future opens are blocked until consent is cleared.</p>
+          <div class="ui-card-tools">
+            <button id="clear-cookies" type="button" class="ui-btn-mini">Clear consent</button>
+            <button id="read-cookies" type="button" class="ui-btn-mini">Read consent</button>
+          </div>
+        </article>
+
+        <article class="ui-card">
+          <button id="run-newsletter" class="ui-btn ui-btn-tech ui-btn-block-start">Exit newsletter</button>
+          <small id="status-newsletter" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">actionOnLeave</span>
+            <span class="test-pill">storageGate</span>
+            <span class="test-pill">titleBlink</span>
+          </div>
+          <p class="test-note">Arm it, then move cursor out of the viewport. Closing stores session state.</p>
+          <div class="ui-card-tools">
+            <button id="clear-newsletter" type="button" class="ui-btn-mini">Clear seen</button>
+            <button id="read-newsletter" type="button" class="ui-btn-mini">Read seen</button>
+          </div>
+        </article>
+
+        <article class="ui-card">
+          <button id="run-deleteConfirm" class="ui-btn ui-btn-tech ui-btn-block-start">Delete confirm</button>
+          <small id="status-deleteConfirm" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">actionOnKey</span>
+            <span class="test-pill">storageOn</span>
+          </div>
+          <p class="test-note">Destructive confirm. ESC closes, Delete destroys, Confirm writes session storage.</p>
+          <div class="ui-card-tools">
+            <button id="read-deleteConfirm" type="button" class="ui-btn-mini">Read result</button>
+            <button id="clear-deleteConfirm" type="button" class="ui-btn-mini">Clear result</button>
+          </div>
+        </article>
+
+        <article class="ui-card">
+          <button id="run-onboarding" class="ui-btn ui-btn-tech ui-btn-block-start">Onboarding wizard</button>
+          <small id="status-onboarding" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">focusTrap</span>
+            <span class="test-pill">actionOnKey</span>
+            <span class="test-pill">storageOn</span>
+          </div>
+          <p class="test-note">Keyboard-friendly first-run modal. Enter/Escape close; Finish writes local storage.</p>
+          <div class="ui-card-tools">
+            <button id="read-onboarding" type="button" class="ui-btn-mini">Read done</button>
+            <button id="clear-onboarding" type="button" class="ui-btn-mini">Clear done</button>
+          </div>
+        </article>
+
+        <article class="ui-card">
+          <button id="run-timeout" class="ui-btn ui-btn-tech ui-btn-block-start">Session timeout</button>
+          <small id="status-timeout" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">actionAfter</span>
+            <span class="test-pill">storageOnEvent</span>
+          </div>
+          <p class="test-note">Schedules a delayed modal. It opens after 900 ms and writes session storage on open.</p>
+          <div class="ui-card-tools">
+            <button id="read-timeout" type="button" class="ui-btn-mini">Read open</button>
+            <button id="clear-timeout" type="button" class="ui-btn-mini">Clear open</button>
+          </div>
+        </article>
+
+        <article class="ui-card">
+          <button id="run-mediaPreview" class="ui-btn ui-btn-tech ui-btn-block-start">Media preview</button>
+          <small id="status-mediaPreview" class="test-status">Ready</small>
+          <div class="ui-card-tools">
+            <span class="test-pill">animateCss</span>
+            <span class="test-pill">lockScroll</span>
+            <span class="test-pill">titleBlink</span>
+          </div>
+          <p class="test-note">Lightbox-style modal with CSS animation, scroll lock, and title blink while the tab is inactive.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">Plugin Conflict Matrix</h2>
+      <p class="ui-section-subtitle">Stress tests for plugin combinations: storage gate cycles, action timers, leave/scroll triggers, RWD updates, nested focus traps, animation overlap, title blinking, and destroy cleanup.</p>
+      <div id="conflictGrid" class="test-dashboard"></div>
+    </section>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">Scroll Zone</h2>
+      <p class="ui-section-subtitle">Use this tall area for <span class="ui-mono">actionOnScroll</span>, lockScroll, RWD, and restore-position scenarios.</p>
+      <div class="test-spacer"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { create as modalCreate } from "../modules/modal/index.js";
+
+    const initialTitle = document.title;
+    const activeModals = new Set();
+    const dynamicModals = new Set();
+    const instances = new Map();
+    const storagePrefix = "modal:integration:";
+    const realTestIds = ["googleConsent", "cookies", "newsletter", "deleteConfirm", "onboarding", "timeout", "mediaPreview"];
+
+    const baseCloseByClick = {
+      actionOn: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            on: [
+              ["backdrop", "click"],
+              ["close", "click"],
+              ["panel", "click", "[data-close-modal]"],
+            ],
+          },
+        ],
+      },
+    };
+
+    const baseCloseByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    const baseAnimation = {
+      animateWaapi: {
+        enabled: true,
+      },
+      animateCss: {
+        enabled: false,
+      },
+    };
+
+    function key(name) {
+      return `${storagePrefix}${name}`;
+    }
+
+    function store(type = "local") {
+      return type === "session" ? sessionStorage : localStorage;
+    }
+
+    function setStorage(type, name, value = "1") {
+      store(type).setItem(key(name), value);
+    }
+
+    function clearStorageKey(type, name) {
+      store(type).removeItem(key(name));
+    }
+
+    function readStorage(type, name) {
+      return store(type).getItem(key(name));
+    }
+
+    function allSettings(features = {}, extra = {}) {
+      return {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...baseCloseByClick,
+          ...baseCloseByEsc,
+          ...baseAnimation,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          ...features,
+        },
+        ...extra,
+      };
+    }
+
+    function content(title, rows = [], controls = "") {
+      return `
+        <h3 class="ui-content-title">${title}</h3>
+        <ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul>
+        ${controls}
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-close-modal>Done</button>
+          <input class="ui-input" aria-label="${title} input" placeholder="Focusable field" />
+        </div>
+      `;
+    }
+
+    function setStatus(id, text) {
+      const node = document.getElementById(`status-${id}`);
+      if (node) node.textContent = text;
+    }
+
+    function storageStatus(id, storageName = id, type = "local") {
+      setStatus(id, `${type}:${key(storageName)} = ${readStorage(type, storageName) ?? "null"}`);
+    }
+
+    function remember(id, modal, dynamic = false) {
+      activeModals.add(modal);
+      if (dynamic) dynamicModals.add(modal);
+
+      const list = instances.get(id) ?? [];
+      list.push(modal);
+      instances.set(id, list);
+
+      modal.subscribe("open", () => setStatus(id, "Opened"));
+      modal.subscribe("close", () => setStatus(id, "Closed"));
+      modal.subscribe("destroy", () => setStatus(id, "Destroyed"));
+      modal.subscribe("open:blocked", () => setStatus(id, "Blocked: open gate"));
+      modal.subscribe("close:blocked", () => setStatus(id, "Blocked: close gate"));
+      modal.subscribe("destroy:blocked", () => setStatus(id, "Blocked: destroy gate"));
+      return modal;
+    }
+
+    async function createModal(id, settings, html, { dynamic = false } = {}) {
+      const modal = await modalCreate(settings);
+      modal.setContent(html);
+      return remember(id, modal, dynamic);
+    }
+
+    async function ensure(id, factory) {
+      const list = instances.get(id) ?? [];
+      const existing = list.find((modal) => !modal.destroyed);
+      if (existing) return existing;
+      return factory();
+    }
+
+    function closeAll() {
+      for (const modal of Array.from(activeModals)) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    }
+
+    function destroyDynamic() {
+      for (const modal of Array.from(dynamicModals)) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+        dynamicModals.delete(modal);
+      }
+      for (const [id, modals] of instances) {
+        const alive = modals.filter((modal) => !modal.destroyed);
+        if (alive.length === 0) {
+          instances.delete(id);
+        } else {
+          instances.set(id, alive);
+        }
+      }
+    }
+
+    function clearTestStorage() {
+      for (const storage of [localStorage, sessionStorage]) {
+        for (let i = storage.length - 1; i >= 0; i -= 1) {
+          const name = storage.key(i);
+          if (typeof name === "string" && name.startsWith(storagePrefix)) storage.removeItem(name);
+        }
+      }
+      for (const id of realTestIds) setStatus(id, "Test storage cleared");
+      for (const test of tests) setStatus(test.id, "Test storage cleared");
+    }
+
+    function addCard(test) {
+      const host = document.getElementById(test.group === "real" ? "realGrid" : "conflictGrid");
+      const article = document.createElement("article");
+      article.className = "ui-card";
+      article.innerHTML = `
+        <button id="run-${test.id}" class="ui-btn ui-btn-tech ui-btn-block-start">${test.label}</button>
+        <small id="status-${test.id}" class="test-status">${test.status ?? "Ready"}</small>
+        <div class="ui-card-tools">
+          ${(test.tags ?? []).map((tag) => `<span class="test-pill">${tag}</span>`).join("")}
+        </div>
+        <p class="test-note">${test.note}</p>
+        <div class="ui-card-tools" id="tools-${test.id}"></div>
+      `;
+      host.append(article);
+
+      document.getElementById(`run-${test.id}`)?.addEventListener("click", () => test.run());
+
+      const tools = document.getElementById(`tools-${test.id}`);
+      for (const action of test.actions ?? []) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ui-btn-mini";
+        button.textContent = action.label;
+        button.addEventListener("click", () => action.run());
+        tools?.append(button);
+      }
+    }
+
+    async function createGoogleConsentModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [{ do: "close", keys: ["Escape", "Esc"], when: "open" }],
+          },
+          storageGate: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:googleConsent",
+                storage: "local",
+                allowWhen: "missing",
+                event: "guard:open",
+              },
+            ],
+          },
+          storageOn: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:googleConsent",
+                storage: "local",
+                do: "set",
+                value: "all",
+                on: [["panel", "click", "[data-consent-all]"]],
+              },
+              {
+                key: "modal:integration:googleConsent",
+                storage: "local",
+                do: "set",
+                value: "necessary",
+                on: [["panel", "click", "[data-consent-necessary]"]],
+              },
+              {
+                key: "modal:integration:googleConsent",
+                storage: "local",
+                do: "set",
+                value: "custom",
+                on: [["panel", "click", "[data-consent-custom]"]],
+              },
+            ],
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Google Consent Mode</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: consent categories are shown before analytics or marketing tools are enabled.</li>
+          <li>Accept all, Reject optional, or Save choices writes local storage.</li>
+          <li>After storage is written, <span class="ui-mono">storageGate</span> blocks future opens.</li>
+        </ul>
+        <div class="ui-row ui-mt-sm">
+          <label class="ui-btn-mini"><input type="checkbox" checked disabled /> necessary</label>
+          <label class="ui-btn-mini"><input type="checkbox" /> analytics</label>
+          <label class="ui-btn-mini"><input type="checkbox" /> marketing</label>
+          <label class="ui-btn-mini"><input type="checkbox" /> personalization</label>
+        </div>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-consent-all data-close-modal>Accept all</button>
+          <button type="button" class="ui-btn ui-btn-neutral" data-consent-necessary data-close-modal>Reject optional</button>
+          <button type="button" class="ui-btn ui-btn-neutral" data-consent-custom data-close-modal>Save choices</button>
+        </div>
+      `);
+
+      return remember("googleConsent", modal);
+    }
+
+    async function createCookieModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [{ do: "close", keys: ["Escape", "Esc"], when: "open" }],
+          },
+          storageGate: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:cookiesAccepted",
+                storage: "local",
+                allowWhen: "missing",
+                event: "guard:open",
+              },
+            ],
+          },
+          storageOn: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:cookiesAccepted",
+                storage: "local",
+                do: "set",
+                value: "accepted",
+                on: [["panel", "click", "[data-accept-cookies]"]],
+              },
+            ],
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Cookie consent</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: cookie banner opens only while local consent is missing.</li>
+          <li>Accept writes storage and closes the modal.</li>
+          <li>Reopening is blocked after acceptance until storage is cleared.</li>
+        </ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-accept-cookies data-close-modal>Accept cookies</button>
+          <button type="button" class="ui-btn ui-btn-neutral" data-close-modal>Manage later</button>
+        </div>
+      `);
+
+      return remember("cookies", modal);
+    }
+
+    async function createNewsletterModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [{ do: "close", keys: ["Escape", "Esc"], when: "open" }],
+          },
+          storageGate: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:newsletterSeen",
+                storage: "session",
+                allowWhen: "missing",
+                event: "guard:open",
+              },
+            ],
+          },
+          actionOnLeave: {
+            enabled: true,
+            rules: [
+              {
+                do: "open",
+                delay: 250,
+                once: true,
+                when: "closed",
+              },
+            ],
+          },
+          storageOnEvent: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:newsletterSeen",
+                storage: "session",
+                do: "set",
+                value: "seen",
+                event: "close",
+              },
+            ],
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "Newsletter is waiting",
+              interval: 700,
+            },
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Exit newsletter</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: exit-intent opens once per session.</li>
+          <li>Close writes session storage so it does not reopen.</li>
+          <li>Switch away while open to verify <span class="ui-mono">titleBlinkOnAway</span>.</li>
+        </ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-close-modal>Join later</button>
+          <input class="ui-input" aria-label="Email" placeholder="email@example.com" />
+        </div>
+      `);
+
+      return remember("newsletter", modal);
+    }
+
+    async function createDeleteModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              { do: "close", keys: ["Escape", "Esc"], when: "open" },
+              { do: "destroy", keys: ["Delete"], when: "open" },
+            ],
+          },
+          storageOn: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:deleteConfirmed",
+                storage: "session",
+                do: "set",
+                value: "confirmed",
+                on: [["panel", "click", "[data-confirm-delete]"]],
+              },
+            ],
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Delete confirmation</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: destructive action with focus trap, ESC close, and Delete destroy.</li>
+          <li>Confirm writes session storage.</li>
+        </ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-confirm-delete data-close-modal>Confirm delete</button>
+          <button type="button" class="ui-btn ui-btn-neutral" data-close-modal>Cancel</button>
+        </div>
+      `);
+
+      return remember("deleteConfirm", modal);
+    }
+
+    async function createOnboardingModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              { do: "close", keys: ["Escape", "Esc"], when: "open" },
+              { do: "close", keys: ["Enter"], when: "open" },
+            ],
+          },
+          storageOn: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:onboardingDone",
+                storage: "local",
+                do: "set",
+                value: "done",
+                on: [["panel", "click", "[data-finish-onboarding]"]],
+              },
+            ],
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Onboarding step</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: first-run wizard step.</li>
+          <li>Enter or Done closes. Done writes local storage.</li>
+          <li>Focus trap keeps keyboard navigation inside the modal.</li>
+        </ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-finish-onboarding data-close-modal>Finish onboarding</button>
+        </div>
+      `);
+
+      return remember("onboarding", modal);
+    }
+
+    async function createTimeoutModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionAfter: {
+            enabled: true,
+            rules: [
+              {
+                do: "open",
+                delay: 900,
+                when: "closed",
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [
+              { do: "close", keys: ["Escape", "Esc"], when: "open" },
+              { do: "destroy", keys: ["D", "d"], when: "open" },
+            ],
+          },
+          storageOnEvent: {
+            enabled: true,
+            rules: [
+              {
+                key: "modal:integration:timeoutOpened",
+                storage: "session",
+                do: "set",
+                value: "opened",
+                event: "open",
+              },
+            ],
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Session timeout warning</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: delayed warning opens after creation.</li>
+          <li>Opening writes session storage.</li>
+          <li>Press D while open to test destroy cleanup.</li>
+        </ul>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-close-modal>Continue session</button>
+        </div>
+      `);
+
+      return remember("timeout", modal, true);
+    }
+
+    async function createMediaModal() {
+      const modal = await modalCreate({
+        config: { target: document.body },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                  ["panel", "click", "[data-close-modal]"],
+                ],
+              },
+            ],
+          },
+          actionOnKey: {
+            enabled: true,
+            rules: [{ do: "close", keys: ["Escape", "Esc"], when: "open" }],
+          },
+          animateCss: {
+            enabled: true,
+          },
+          animateWaapi: {
+            enabled: false,
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "Media preview is open",
+              interval: 850,
+            },
+          },
+        },
+      });
+
+      modal.setContent(`
+        <h3 class="ui-content-title">Media preview</h3>
+        <ul class="ui-content-list">
+          <li>Real flow: lightbox/media preview with lockScroll and CSS animation.</li>
+          <li>Switch away while open to verify title blinking.</li>
+          <li>Close should restore scroll and title.</li>
+        </ul>
+        <div style="aspect-ratio: 16 / 9; border-radius: 8px; border: 1px solid rgb(var(--ui-border)); background: linear-gradient(135deg, rgb(58 186 180 / 0.35), rgb(20 20 24)); display: grid; place-items: center; margin-top: 12px;">
+          <strong>Preview surface</strong>
+        </div>
+        <div class="ui-row ui-mt-sm">
+          <button type="button" class="ui-btn ui-btn-tech" data-close-modal>Close preview</button>
+        </div>
+      `);
+
+      return remember("mediaPreview", modal);
+    }
+
+    async function createAllPluginsModal() {
+      return createModal(
+        "allPlugins",
+        allSettings({
+          actionAfter: {
+            enabled: true,
+            rules: [{ do: "open", delay: 350, when: "closed" }],
+          },
+          actionOnEvent: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                event: "integration:close-all-plugins",
+                when: "open",
+              },
+            ],
+          },
+          actionOnScroll: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                amount: 180,
+                once: false,
+                when: "open",
+              },
+            ],
+          },
+          actionOnLeave: {
+            enabled: true,
+            rules: [
+              {
+                do: "open",
+                delay: 400,
+                once: false,
+                when: "closed",
+              },
+            ],
+          },
+          storageGate: {
+            enabled: true,
+            rules: [
+              {
+                key: key("allPluginsBlocked"),
+                storage: "local",
+                allowWhen: "missing",
+                event: "guard:open",
+              },
+            ],
+          },
+          storageOn: {
+            enabled: true,
+            rules: [
+              {
+                key: key("allPluginsTouched"),
+                storage: "local",
+                do: "set",
+                value: "panel-click",
+                on: [["panel", "click", "[data-touch-all]"]],
+              },
+            ],
+          },
+          storageOnEvent: {
+            enabled: true,
+            rules: [
+              {
+                key: key("allPluginsOpened"),
+                storage: "session",
+                do: "set",
+                value: "open",
+                event: "open",
+              },
+            ],
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "All plugins modal",
+              interval: 650,
+            },
+          },
+        }),
+        content("All plugins in one instance", [
+          "Conflict test: actionAfter, actionOn, actionOnEvent, actionOnKey, actionOnLeave, actionOnScroll, storageGate, storageOn, storageOnEvent, focusTrap, lockScroll, titleBlink, and WAAPI.",
+          "Scroll while open should close. Custom event can close. Storage gate can block open.",
+        ], `
+          <div class="ui-row ui-mt-sm">
+            <button type="button" class="ui-btn ui-btn-tech" data-touch-all>Write panel storage</button>
+          </div>
+        `),
+        { dynamic: true }
+      );
+    }
+
+    const tests = [
+      {
+        id: "allPlugins",
+        group: "conflict",
+        label: "All plugins instance",
+        tags: ["everything"],
+        note: "One modal intentionally combines almost every plugin. Use with debug console open.",
+        run: async () => {
+          await ensure("allPlugins", createAllPluginsModal);
+          setStatus("allPlugins", "Armed once. It may auto-open via actionAfter or leave.");
+        },
+        actions: [
+          { label: "Block open", run: () => { setStorage("local", "allPluginsBlocked", "1"); storageStatus("allPlugins", "allPluginsBlocked", "local"); } },
+          { label: "Unblock", run: () => { clearStorageKey("local", "allPluginsBlocked"); storageStatus("allPlugins", "allPluginsBlocked", "local"); } },
+          { label: "Notify close", run: () => { const modal = (instances.get("allPlugins") ?? []).find((item) => !item.destroyed); modal?.notify("integration:close-all-plugins"); } },
+        ],
+      },
+      {
+        id: "storageCycle",
+        group: "conflict",
+        label: "Storage gate cycle",
+        tags: ["storageOn", "storageGate"],
+        note: "Open is allowed while key is missing. Button writes the key, then future opens are blocked.",
+        run: async () => {
+          const modal = await createModal(
+            "storageCycle",
+            allSettings({
+              storageGate: {
+                enabled: true,
+                rules: [{ key: key("storageCycle"), storage: "local", allowWhen: "missing", event: "guard:open" }],
+              },
+              storageOn: {
+                enabled: true,
+                rules: [{ key: key("storageCycle"), storage: "local", do: "set", value: "locked", on: [["panel", "click", "[data-lock-cycle]"]] }],
+              },
+            }),
+            content("Storage gate cycle", [
+              "Click Lock future opens, close, then try opening again.",
+              "Expected: open is blocked until storage is cleared.",
+            ], `<div class="ui-row ui-mt-sm"><button type="button" class="ui-btn ui-btn-tech" data-lock-cycle data-close-modal>Lock future opens</button></div>`),
+            { dynamic: true }
+          );
+          await modal.open();
+        },
+        actions: [
+          { label: "Clear key", run: () => { clearStorageKey("local", "storageCycle"); storageStatus("storageCycle", "storageCycle", "local"); } },
+          { label: "Read key", run: () => storageStatus("storageCycle", "storageCycle", "local") },
+        ],
+      },
+      {
+        id: "leaveScrollRace",
+        group: "conflict",
+        label: "Leave + scroll race",
+        tags: ["actionOnLeave", "actionOnScroll"],
+        note: "Leave opens the modal. Scroll while open closes it. Use Disarm when you do not want the global leave listener active.",
+        run: async () => {
+          const modal = await ensure("leaveScrollRace", () =>
+            createModal(
+              "leaveScrollRace",
+              allSettings({
+                lockScroll: { enabled: false },
+                actionOnLeave: {
+                  enabled: true,
+                  rules: [{ do: "open", delay: 0, once: false, when: "closed" }],
+                },
+                actionOnScroll: {
+                  enabled: true,
+                  rules: [{ do: "close", amount: 100, once: false, when: "open" }],
+                },
+              }),
+              content("Leave + scroll race", [
+                "Move cursor out to open.",
+                "Scroll the document while open to close.",
+                "LockScroll is disabled on purpose so window scroll can drive the close action.",
+              ])
+            )
+          );
+          setStatus("leaveScrollRace", "Armed. Move cursor out, then scroll while open.");
+        },
+        actions: [
+          {
+            label: "Disarm",
+            run: () => {
+              for (const modal of instances.get("leaveScrollRace") ?? []) {
+                try {
+                  modal.destroy();
+                } catch {}
+                activeModals.delete(modal);
+                dynamicModals.delete(modal);
+              }
+              instances.delete("leaveScrollRace");
+              setStatus("leaveScrollRace", "Disarmed");
+            },
+          },
+        ],
+      },
+      {
+        id: "rwdLock",
+        group: "conflict",
+        label: "RWD lock switch",
+        tags: ["lockScroll", "rwd"],
+        note: "Desktop locks scroll. Mobile disables lockScroll. Resize while open.",
+        run: async () => {
+          const modal = await ensure("rwdLock", () =>
+            createModal(
+              "rwdLock",
+              allSettings(
+                {
+                  titleBlinkOnAway: { enabled: true, options: { title: "RWD lock desktop", interval: 800 } },
+                  lockScroll: { enabled: true, options: { reserveGap: true } },
+                },
+                {
+                  rwd: {
+                    "(max-width: 767px)": {
+                      features: {
+                        lockScroll: { enabled: false },
+                        titleBlinkOnAway: { enabled: true, options: { title: "RWD lock mobile", interval: 500 } },
+                      },
+                    },
+                  },
+                }
+              ),
+              content("RWD lock switch", [
+                "Desktop/tablet: body scroll should be blocked.",
+                "Mobile <=767: lockScroll is disabled, body scroll should be available.",
+                "Resize while open to exercise plugin mount/unmount/update.",
+              ])
+            )
+          );
+          await modal.open();
+        },
+      },
+      {
+        id: "dualFocus",
+        group: "conflict",
+        label: "Dual focus stack",
+        tags: ["focusTrap", "lockScroll"],
+        note: "Opens two modals. Tests focus trap and scroll lock counter behavior.",
+        run: async () => {
+          const a = await createModal("dualFocus", allSettings(), content("Focus stack A", ["Lower modal. Close top first, then this one."]), { dynamic: true });
+          const b = await createModal("dualFocus", allSettings(), content("Focus stack B", ["Top modal. Tab behavior with two traps is intentionally controversial."]), { dynamic: true });
+          await a.open();
+          setTimeout(() => b.open(), 250);
+          setStatus("dualFocus", "Two modals opening.");
+        },
+      },
+      {
+        id: "animationOverlap",
+        group: "conflict",
+        label: "CSS + WAAPI overlap",
+        tags: ["animateCss", "animateWaapi"],
+        note: "Both animation plugins enabled. This intentionally checks transition collisions.",
+        run: async () => {
+          const modal = await createModal(
+            "animationOverlap",
+            allSettings({
+              animateCss: { enabled: true },
+              animateWaapi: { enabled: true },
+            }),
+            content("CSS + WAAPI overlap", [
+              "Both animation plugins subscribe to transition pipelines.",
+              "Expected: if this feels odd, the conflict is real and should be avoided or ordered explicitly.",
+            ]),
+            { dynamic: true }
+          );
+          await modal.open();
+        },
+      },
+      {
+        id: "titleStack",
+        group: "conflict",
+        label: "Title blink stack",
+        tags: ["titleBlink", "known edge"],
+        note: "Two titleBlink instances can overwrite base title. Known limitation, kept visible.",
+        run: async () => {
+          const a = await createModal("titleStack", allSettings({ titleBlinkOnAway: { enabled: true, options: { title: "Title stack A", interval: 500 } } }), content("Title stack A", ["Open with a second title blink instance."]), { dynamic: true });
+          const b = await createModal("titleStack", allSettings({ titleBlinkOnAway: { enabled: true, options: { title: "Title stack B", interval: 700 } } }), content("Title stack B", ["Switch away and return. Restore title button is available."]), { dynamic: true });
+          await a.open();
+          setTimeout(() => b.open(), 250);
+          setStatus("titleStack", "Known limitation: restore may need Restore title.");
+        },
+      },
+      {
+        id: "destroyStorm",
+        group: "conflict",
+        label: "Destroy during timers",
+        tags: ["destroy", "timers"],
+        note: "Creates timers, storage event handlers, animation, and then destroys quickly.",
+        run: async () => {
+          const modal = await createModal(
+            "destroyStorm",
+            allSettings({
+              actionAfter: { enabled: true, rules: [{ do: "open", delay: 500, when: "closed" }] },
+              storageOnEvent: { enabled: true, rules: [{ key: key("destroyStorm"), storage: "local", do: "set", value: "open", event: "open" }] },
+              titleBlinkOnAway: { enabled: true, options: { title: "Destroy storm", interval: 400 } },
+            }),
+            content("Destroy during timers", [
+              "Instance has actionAfter, storageOnEvent, titleBlink, focusTrap, lockScroll, and animation.",
+              "It will be destroyed before the delayed open should fire.",
+            ]),
+            { dynamic: true }
+          );
+          setStatus("destroyStorm", "Destroy scheduled in 180 ms.");
+          setTimeout(() => {
+            try {
+              modal.destroy();
+            } catch {}
+            storageStatus("destroyStorm", "destroyStorm", "local");
+          }, 180);
+        },
+        actions: [
+          { label: "Read storage", run: () => storageStatus("destroyStorm", "destroyStorm", "local") },
+        ],
+      },
+      {
+        id: "customEventBus",
+        group: "conflict",
+        label: "Custom event bus",
+        tags: ["actionOnEvent", "storageOnEvent"],
+        note: "Same custom event closes modal and writes storage.",
+        run: async () => {
+          const modal = await ensure("customEventBus", () =>
+            createModal(
+              "customEventBus",
+              allSettings({
+                actionOnEvent: {
+                  enabled: true,
+                  rules: [{ do: "close", event: "integration:commit", when: "open" }],
+                },
+                storageOnEvent: {
+                  enabled: true,
+                  rules: [{ key: key("customEventBus"), storage: "session", do: "set", value: "committed", event: "integration:commit" }],
+                },
+              }),
+              content("Custom event bus", [
+                "Open, then press Emit commit.",
+                "The same event writes storage and closes the modal.",
+              ])
+            )
+          );
+          await modal.open();
+        },
+        actions: [
+          { label: "Emit commit", run: () => { const modal = (instances.get("customEventBus") ?? []).find((item) => !item.destroyed); modal?.notify("integration:commit"); storageStatus("customEventBus", "customEventBus", "session"); } },
+          { label: "Read commit", run: () => storageStatus("customEventBus", "customEventBus", "session") },
+        ],
+      },
+      {
+        id: "closeGate",
+        group: "conflict",
+        label: "Close gate conflict",
+        tags: ["storageGate", "actionOn"],
+        note: "Storage key blocks close. Tests blocked close with backdrop, ESC, and close button.",
+        run: async () => {
+          const modal = await ensure("closeGate", () =>
+            createModal(
+              "closeGate",
+              allSettings({
+                storageGate: {
+                  enabled: true,
+                  rules: [{ key: key("closeGate"), storage: "local", allowWhen: "missing", event: "guard:close" }],
+                },
+              }),
+              content("Close gate conflict", [
+                "Set block key, then try close button, backdrop, or ESC.",
+                "Clear key to allow close.",
+              ])
+            )
+          );
+          await modal.open();
+        },
+        actions: [
+          { label: "Block close", run: () => { setStorage("local", "closeGate", "blocked"); storageStatus("closeGate", "closeGate", "local"); } },
+          { label: "Allow close", run: () => { clearStorageKey("local", "closeGate"); storageStatus("closeGate", "closeGate", "local"); } },
+        ],
+      },
+    ];
+
+    for (const test of tests) {
+      addCard(test);
+    }
+
+    document.getElementById("run-googleConsent")?.addEventListener("click", async () => {
+      const modal = await ensure("googleConsent", createGoogleConsentModal);
+      await modal.open();
+      storageStatus("googleConsent", "googleConsent", "local");
+    });
+    document.getElementById("clear-googleConsent")?.addEventListener("click", () => {
+      clearStorageKey("local", "googleConsent");
+      storageStatus("googleConsent", "googleConsent", "local");
+    });
+    document.getElementById("read-googleConsent")?.addEventListener("click", () => storageStatus("googleConsent", "googleConsent", "local"));
+
+    document.getElementById("run-cookies")?.addEventListener("click", async () => {
+      const modal = await ensure("cookies", createCookieModal);
+      await modal.open();
+      storageStatus("cookies", "cookiesAccepted", "local");
+    });
+    document.getElementById("clear-cookies")?.addEventListener("click", () => {
+      clearStorageKey("local", "cookiesAccepted");
+      storageStatus("cookies", "cookiesAccepted", "local");
+    });
+    document.getElementById("read-cookies")?.addEventListener("click", () => storageStatus("cookies", "cookiesAccepted", "local"));
+
+    document.getElementById("run-newsletter")?.addEventListener("click", async () => {
+      await ensure("newsletter", createNewsletterModal);
+      setStatus("newsletter", "Armed. Move cursor out of the viewport.");
+    });
+    document.getElementById("clear-newsletter")?.addEventListener("click", () => {
+      clearStorageKey("session", "newsletterSeen");
+      storageStatus("newsletter", "newsletterSeen", "session");
+    });
+    document.getElementById("read-newsletter")?.addEventListener("click", () => storageStatus("newsletter", "newsletterSeen", "session"));
+
+    document.getElementById("run-deleteConfirm")?.addEventListener("click", async () => {
+      const modal = await ensure("deleteConfirm", createDeleteModal);
+      await modal.open();
+    });
+    document.getElementById("read-deleteConfirm")?.addEventListener("click", () => storageStatus("deleteConfirm", "deleteConfirmed", "session"));
+    document.getElementById("clear-deleteConfirm")?.addEventListener("click", () => {
+      clearStorageKey("session", "deleteConfirmed");
+      storageStatus("deleteConfirm", "deleteConfirmed", "session");
+    });
+
+    document.getElementById("run-onboarding")?.addEventListener("click", async () => {
+      const modal = await ensure("onboarding", createOnboardingModal);
+      await modal.open();
+    });
+    document.getElementById("read-onboarding")?.addEventListener("click", () => storageStatus("onboarding", "onboardingDone", "local"));
+    document.getElementById("clear-onboarding")?.addEventListener("click", () => {
+      clearStorageKey("local", "onboardingDone");
+      storageStatus("onboarding", "onboardingDone", "local");
+    });
+
+    document.getElementById("run-timeout")?.addEventListener("click", async () => {
+      for (const modal of instances.get("timeout") ?? []) {
+        try {
+          modal.destroy();
+        } catch {}
+        activeModals.delete(modal);
+        dynamicModals.delete(modal);
+      }
+      instances.delete("timeout");
+      await createTimeoutModal();
+      setStatus("timeout", "Timer scheduled. Wait about 900 ms.");
+    });
+    document.getElementById("read-timeout")?.addEventListener("click", () => storageStatus("timeout", "timeoutOpened", "session"));
+    document.getElementById("clear-timeout")?.addEventListener("click", () => {
+      clearStorageKey("session", "timeoutOpened");
+      storageStatus("timeout", "timeoutOpened", "session");
+    });
+
+    document.getElementById("run-mediaPreview")?.addEventListener("click", async () => {
+      const modal = await ensure("mediaPreview", createMediaModal);
+      await modal.open();
+    });
+
+    document.getElementById("closeAll")?.addEventListener("click", closeAll);
+    document.getElementById("destroyAll")?.addEventListener("click", destroyDynamic);
+    document.getElementById("clearStorage")?.addEventListener("click", clearTestStorage);
+    document.getElementById("restoreTitle")?.addEventListener("click", () => {
+      document.title = initialTitle;
+      for (const id of realTestIds) setStatus(id, "Title restored");
+      for (const test of tests) setStatus(test.id, "Title restored");
+    });
+
+    window.__modalIntegration = {
+      activeModals,
+      dynamicModals,
+      instances,
+      tests,
+      closeAll,
+      destroyDynamic,
+      clearTestStorage,
+    };
+  </script>
+</body>
+</html>

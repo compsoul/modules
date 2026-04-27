@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FocusTrap Plugin Tests</title>
+  <link rel="stylesheet" href="../ui.css" />
+  <link rel="stylesheet" href="../../modules/modal/style.css" />
+</head>
+<body class="module-ui ui-app ui-page">
+  <main class="ui-main ui-shell">
+    <header class="ui-header">
+      <h1 class="ui-title">Modal | focusTrap</h1>
+      <p class="ui-muted">Configuration overview and validation scenarios for <span class="ui-mono">focusTrap</span>. This plugin keeps keyboard focus inside the modal panel, optionally focuses the first focusable control on open, and restores focus after close/destroy.</p>
+    </header>
+
+    <section class="ui-section">
+      <h2 class="ui-section-title">FocusTrap Instances</h2>
+      <p class="ui-section-subtitle">Each card opens one validation scenario of the <span class="ui-mono">focusTrap</span> plugin and shows the exact configuration in a code window. Use Tab, Shift+Tab, Escape, and the visible controls inside each modal to verify focus behavior.</p>
+      <div class="ui-row ui-mt-sm">
+        <button id="closeAllFocusTrap" class="ui-btn ui-btn-neutral">Close all</button>
+      </div>
+      <div id="instancesGrid" class="ui-grid ui-mt-sm">
+        <article class="ui-card">
+          <button id="openInstanceCustom" class="ui-btn ui-btn-tech ui-btn-block-start">Custom default</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeCustom">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeCustom" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeCustom" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT1" class="ui-btn ui-btn-tech ui-btn-block-start">T1 disabled</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT1">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT1" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT1" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT2" class="ui-btn ui-btn-tech ui-btn-block-start">T2 default</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT2">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT2" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT2" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT3" class="ui-btn ui-btn-tech ui-btn-block-start">T3 custom options</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT3">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT3" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT3" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT4" class="ui-btn ui-btn-tech ui-btn-block-start">T4 rwd variants</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT4">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT4" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT4" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT5" class="ui-btn ui-btn-tech ui-btn-block-start">T5 full stack</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT5">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT5" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT5" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT6" class="ui-btn ui-btn-tech ui-btn-block-start">T6 reentry</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT6">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT6" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT6" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT7" class="ui-btn ui-btn-tech ui-btn-block-start">T7 dual stack</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT7">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT7" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT7" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT8" class="ui-btn ui-btn-tech ui-btn-block-start">T8 destroy/recreate</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT8">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT8" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT8" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT9" class="ui-btn ui-btn-tech ui-btn-block-start">T9 autoFocus</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT9">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT9" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT9" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT10" class="ui-btn ui-btn-tech ui-btn-block-start">T10 no autoFocus</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT10">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT10" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT10" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT11" class="ui-btn ui-btn-tech ui-btn-block-start">T11 restoreFocus</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT11">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT11" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT11" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT12" class="ui-btn ui-btn-tech ui-btn-block-start">T12 no restore</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT12">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT12" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT12" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT13" class="ui-btn ui-btn-tech ui-btn-block-start">T13 Tab loop</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT13">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT13" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT13" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT14" class="ui-btn ui-btn-tech ui-btn-block-start">T14 panel fallback</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT14">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT14" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT14" class="ui-code ui-mono"></pre></div>
+        </article>
+        <article class="ui-card">
+          <button id="openInstanceT15" class="ui-btn ui-btn-tech ui-btn-block-start">T15 dynamic focus</button>
+          <div class="ui-card-tools">
+            <label class="ui-btn-mini" for="showFocusTrapCodeT15">Show code</label>
+          </div>
+          <input type="checkbox" class="ui-toggle" id="showFocusTrapCodeT15" />
+          <div class="ui-code-wrap"><pre id="preFocusTrapCodeT15" class="ui-code ui-mono"></pre></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { Modal } from "../../modules/index.js";
+
+    let customDefault;
+    let t1;
+    let t2;
+    let t3;
+    let t4;
+    let t5;
+    let t6;
+    let t7a;
+    let t7b;
+    let t8;
+    let t9;
+    let t10;
+    let t11;
+    let t12;
+    let t13;
+    let t14;
+    let t15;
+    let t8SettingsForRecreate;
+    let t8ContentForRecreate;
+
+    const focusTrapSourceById = {};
+
+    const closeByEsc = {
+      actionOnKey: {
+        enabled: true,
+        rules: [
+          {
+            do: "close",
+            keys: ["Escape", "Esc"],
+            when: "open",
+          },
+        ],
+      },
+    };
+
+    function focusContent(title, rows = []) {
+      return `<h3 class="ui-content-title">${title}</h3><ul class="ui-content-list">${rows.map((row) => `<li>${row}</li>`).join("")}</ul><div class="ui-row ui-mt-sm"><button type="button" class="ui-btn ui-btn-tech">First action</button><input class="ui-input" aria-label="Trap input" placeholder="Focusable input" /><button type="button" class="ui-btn ui-btn-neutral">Last action</button></div>`;
+    }
+
+    async function createTechModals() {
+      const customSettings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+          focusTrap: {
+            enabled: true,
+          },
+        },
+      };
+      customDefault = await Modal.create(customSettings);
+      customDefault.setContent(focusContent("FocusTrap custom default", [
+        "Goal: baseline behavior using the default focusTrap options.",
+        "Expected: first focusable control receives focus on open.",
+        "Tab and Shift+Tab stay inside the panel.",
+        "After close, focus returns to the opener.",
+      ]));
+      focusTrapSourceById.Custom = customSettings;
+
+      const t1Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: false,
+          },
+        },
+      };
+      t1 = await Modal.create(t1Settings);
+      t1.setContent(focusContent("FocusTrap T1: disabled plugin", [
+        "Goal: confirm behavior when focusTrap is disabled.",
+        "Expected: focus is not automatically moved by this plugin.",
+        "Tab behavior is left to the browser/default page.",
+        "Use Escape or Close all to reset.",
+      ]));
+      focusTrapSourceById.T1 = t1Settings;
+
+      const t2Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+          },
+        },
+      };
+      t2 = await Modal.create(t2Settings);
+      t2.setContent(focusContent("FocusTrap T2: default focusTrap", [
+        "Goal: validate default options from modal/defaults.js.",
+        "Default options resolve to autoFocus true and restoreFocus true.",
+        "Expected: focus enters the modal on open and returns to the opener on close.",
+      ]));
+      focusTrapSourceById.T2 = t2Settings;
+
+      const t3Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: false,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t3 = await Modal.create(t3Settings);
+      t3.setContent(focusContent("FocusTrap T3: custom options", [
+        "Goal: verify explicit focusTrap options.",
+        "Scenario: autoFocus is disabled, restoreFocus remains enabled.",
+        "Expected: focus is not forced on open, but returns after close.",
+      ]));
+      focusTrapSourceById.T3 = t3Settings;
+
+      const t4Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "FocusTrap T4 | desktop",
+              interval: 900,
+            },
+          },
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+        rwd: {
+          "(max-width: 767px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "FocusTrap T4 | mobile <=767 | no autofocus",
+                  interval: 700,
+                },
+              },
+              focusTrap: {
+                enabled: true,
+                options: {
+                  autoFocus: false,
+                  restoreFocus: true,
+                },
+              },
+            },
+          },
+          "(min-width: 768px) and (max-width: 1023px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "FocusTrap T4 | tablet 768-1023 | no restore",
+                  interval: 800,
+                },
+              },
+              focusTrap: {
+                enabled: true,
+                options: {
+                  autoFocus: true,
+                  restoreFocus: false,
+                },
+              },
+            },
+          },
+          "(min-width: 1024px)": {
+            features: {
+              titleBlinkOnAway: {
+                enabled: true,
+                options: {
+                  title: "FocusTrap T4 | desktop >=1024 | full trap",
+                  interval: 900,
+                },
+              },
+            },
+          },
+        },
+      };
+      t4 = await Modal.create(t4Settings);
+      t4.setContent(focusContent("FocusTrap T4: RWD variants", [
+        "Goal: verify focusTrap options are swapped by breakpoint.",
+        "Mobile: autoFocus false, restoreFocus true.",
+        "Tablet: autoFocus true, restoreFocus false.",
+        "Desktop: autoFocus true, restoreFocus true.",
+      ]));
+      focusTrapSourceById.T4 = t4Settings;
+
+      const t5Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          backdrop: {
+            enabled: true,
+          },
+          closeButton: {
+            enabled: true,
+          },
+          footer: {
+            enabled: true,
+          },
+          actionOn: {
+            enabled: true,
+            rules: [
+              {
+                do: "close",
+                on: [
+                  ["backdrop", "click"],
+                  ["close", "click"],
+                ],
+              },
+            ],
+          },
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+          lockScroll: {
+            enabled: true,
+            options: {
+              reserveGap: true,
+            },
+          },
+          titleBlinkOnAway: {
+            enabled: true,
+            options: {
+              title: "FocusTrap T5 active",
+              interval: 1000,
+            },
+          },
+        },
+      };
+      t5 = await Modal.create(t5Settings);
+      t5.setContent(focusContent("FocusTrap T5: full stack", [
+        "Goal: validate focusTrap with common modal plugins enabled.",
+        "Stack: focusTrap + actionOn + actionOnKey + lockScroll + titleBlinkOnAway.",
+        "Expected: focus remains trapped while close paths and scroll lock still clean up.",
+      ]));
+      focusTrapSourceById.T5 = t5Settings;
+
+      const t6Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t6 = await Modal.create(t6Settings);
+      t6.setContent(focusContent("FocusTrap T6: reentry stress", [
+        "Goal: detect duplicated keydown listeners or stale lastActive state.",
+        "Scenario: same instance opens and closes repeatedly in quick cadence.",
+        "Expected: focus behavior remains stable after the stress sequence.",
+      ]));
+      focusTrapSourceById.T6 = t6Settings;
+
+      const t7Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t7a = await Modal.create(t7Settings);
+      t7a.setContent(focusContent("FocusTrap T7A", [
+        "Goal: base layer in a two-modal focus trap stack.",
+        "Expected: top modal takes focus when it appears.",
+        "Note: handling Tab only for the active/top modal is worth considering, but it is controversial because the lower modal would need reliable reactivation after the top modal closes.",
+      ]));
+
+      t7b = await Modal.create(t7Settings);
+      t7b.setContent(focusContent("FocusTrap T7B", [
+        "Goal: top layer in stack opened with delay over T7A.",
+        "Observation: both open modals currently keep their own document keydown listeners.",
+        "Possible improvement: a future modal stack could let only the top modal handle Tab, but that requires careful unlock/reactivation behavior for the lower layer.",
+      ]));
+      focusTrapSourceById.T7 = t7Settings;
+
+      const t8Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t8SettingsForRecreate = t8Settings;
+      t8ContentForRecreate = focusContent("FocusTrap T8: destroy during run", [
+        "Goal: verify lifecycle safety under forced destroy/recreate.",
+        "Scenario: open modal, destroy instance shortly after, then create a fresh one.",
+        "Expected: document keydown listener is cleaned up and recreated instance traps focus normally.",
+      ]);
+      t8 = await Modal.create(t8Settings);
+      t8.setContent(t8ContentForRecreate);
+      focusTrapSourceById.T8 = t8Settings;
+
+      const t9Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t9 = await Modal.create(t9Settings);
+      t9.setContent(focusContent("FocusTrap T9: autoFocus", [
+        "Goal: verify initial focus movement on open.",
+        "Expected: the first focusable element inside the panel receives focus.",
+        "Regression signal: focus remains on the opener or moves outside the panel.",
+      ]));
+      focusTrapSourceById.T9 = t9Settings;
+
+      const t10Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: false,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t10 = await Modal.create(t10Settings);
+      t10.setContent(focusContent("FocusTrap T10: no autoFocus", [
+        "Goal: verify that autoFocus false does not force focus on open.",
+        "Expected: no immediate focus jump into the panel.",
+        "After pressing Tab, focus should still be constrained to modal controls.",
+      ]));
+      focusTrapSourceById.T10 = t10Settings;
+
+      const t11Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t11 = await Modal.create(t11Settings);
+      t11.setContent(focusContent("FocusTrap T11: restoreFocus", [
+        "Goal: verify focus restoration after close.",
+        "Scenario: open from this card, move focus inside, then close with Escape.",
+        "Expected: focus returns to the same card button.",
+      ]));
+      focusTrapSourceById.T11 = t11Settings;
+
+      const t12Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: false,
+            },
+          },
+        },
+      };
+      t12 = await Modal.create(t12Settings);
+      t12.setContent(focusContent("FocusTrap T12: no restoreFocus", [
+        "Goal: verify restoreFocus false.",
+        "Scenario: open from this card and close with Escape.",
+        "Expected: plugin does not force focus back to the opener after close.",
+      ]));
+      focusTrapSourceById.T12 = t12Settings;
+
+      const t13Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t13 = await Modal.create(t13Settings);
+      t13.setContent(focusContent("FocusTrap T13: Tab loop", [
+        "Goal: verify forward and backward wrapping.",
+        "Scenario: Tab on the last focusable control should wrap to the first.",
+        "Shift+Tab on the first focusable control should wrap to the last.",
+      ]));
+      focusTrapSourceById.T13 = t13Settings;
+
+      const t14Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          closeButton: {
+            enabled: false,
+          },
+          actionOn: {
+            enabled: false,
+            rules: [],
+          },
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t14 = await Modal.create(t14Settings);
+      t14.setContent("<h3 class=\"ui-content-title\">FocusTrap T14: panel fallback</h3><ul class=\"ui-content-list\"><li>Goal: verify fallback when the panel has no focusable children.</li><li>Scenario: close button is disabled and content has no controls.</li><li>Expected: plugin gives the panel <span class=\"ui-mono\">tabindex=-1</span> and focuses the panel itself.</li><li>Use Escape to close.</li></ul>");
+      focusTrapSourceById.T14 = t14Settings;
+
+      const t15Settings = {
+        config: {
+          target: document.body,
+        },
+        features: {
+          ...closeByEsc,
+          focusTrap: {
+            enabled: true,
+            options: {
+              autoFocus: true,
+              restoreFocus: true,
+            },
+          },
+        },
+      };
+      t15 = await Modal.create(t15Settings);
+      t15.setContent("<h3 class=\"ui-content-title\">FocusTrap T15: dynamic focus</h3><ul class=\"ui-content-list\"><li>Goal: verify the focus list is read fresh on every Tab keydown.</li><li>Scenario: add a new button while modal is open, then Tab through controls.</li><li>Expected: the new dynamic button becomes part of the trap loop.</li></ul><div class=\"ui-row ui-mt-sm\"><button type=\"button\" class=\"ui-btn ui-btn-tech\" data-add-focus>Add focusable</button><button type=\"button\" class=\"ui-btn ui-btn-neutral\">Existing end</button></div><div class=\"ui-row ui-mt-sm\" data-dynamic-focus></div>");
+      focusTrapSourceById.T15 = t15Settings;
+    }
+
+    function addCopyButton(tools, preCode) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "ui-btn-mini";
+      copyButton.textContent = "Copy code";
+      copyButton.addEventListener("click", async () => {
+        const text = preCode.textContent ?? "";
+        if (!text.trim()) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy error";
+        }
+        setTimeout(() => {
+          copyButton.textContent = "Copy code";
+        }, 1200);
+      });
+      tools.prepend(copyButton);
+    }
+
+    await createTechModals();
+
+    const modals = [t1, t2, t3, t4, t5, t6, t7a, t8, t9, t10, t11, t12, t13, t14, t15];
+    const cards = [
+      { id: "Custom", modal: customDefault },
+      { id: "T1", modal: t1 },
+      { id: "T2", modal: t2 },
+      { id: "T3", modal: t3 },
+      { id: "T4", modal: t4 },
+      { id: "T5", modal: t5 },
+      { id: "T6", modal: t6 },
+      { id: "T7", modal: t7a },
+      { id: "T8", modal: t8 },
+      { id: "T9", modal: t9 },
+      { id: "T10", modal: t10 },
+      { id: "T11", modal: t11 },
+      { id: "T12", modal: t12 },
+      { id: "T13", modal: t13 },
+      { id: "T14", modal: t14 },
+      { id: "T15", modal: t15 },
+    ];
+
+    document.getElementById("closeAllFocusTrap")?.addEventListener("click", () => {
+      for (const modal of [customDefault, ...modals, t7b]) {
+        try {
+          modal.close();
+        } catch {}
+      }
+    });
+
+    for (let i = 0; i < cards.length; i++) {
+      const { id, modal } = cards[i];
+      const openButton = document.getElementById(`openInstance${id}`);
+      const preCode = document.getElementById(`preFocusTrapCode${id}`);
+      const tools = openButton?.closest(".ui-card")?.querySelector(".ui-card-tools");
+
+      if (openButton) {
+        openButton.addEventListener("click", async () => {
+          if (id === "T6") {
+            let ticks = 0;
+            const timer = setInterval(() => {
+              if (ticks % 2 === 0) t6.open();
+              else t6.close();
+              ticks += 1;
+              if (ticks >= 10) clearInterval(timer);
+            }, 90);
+            return;
+          }
+
+          if (id === "T7") {
+            t7a.open();
+            setTimeout(() => t7b.open(), 260);
+            return;
+          }
+
+          if (id === "T8") {
+            await t8.open();
+            setTimeout(async () => {
+              try {
+                t8.destroy();
+              } catch {}
+              t8 = await Modal.create(t8SettingsForRecreate);
+              t8.setContent(t8ContentForRecreate);
+              if (preCode) {
+                preCode.textContent = JSON.stringify(focusTrapSourceById.T8 ?? {}, null, 2);
+              }
+              window.__modalsFocusTrap.t8 = t8;
+            }, 140);
+            return;
+          }
+
+          await modal.open();
+
+          if (id === "T15") {
+            const addButton = modal.refs.content?.querySelector("[data-add-focus]");
+            const dynamicHost = modal.refs.content?.querySelector("[data-dynamic-focus]");
+            addButton?.addEventListener("click", () => {
+              if (!dynamicHost || dynamicHost.querySelector("[data-dynamic-created]")) return;
+              const button = document.createElement("button");
+              button.type = "button";
+              button.className = "ui-btn ui-btn-tech";
+              button.dataset.dynamicCreated = "true";
+              button.textContent = "Dynamic button";
+              dynamicHost.append(button);
+              button.focus();
+            }, { once: true });
+          }
+        });
+      }
+
+      if (preCode) {
+        preCode.textContent = JSON.stringify(focusTrapSourceById[id] ?? {}, null, 2);
+      }
+
+      if (tools && preCode) {
+        addCopyButton(tools, preCode);
+      }
+    }
+
+    window.__modalsFocusTrap = { customDefault, t1, t2, t3, t4, t5, t6, t7a, t7b, t8, t9, t10, t11, t12, t13, t14, t15 };
+  </script>
+</body>
+</html>
