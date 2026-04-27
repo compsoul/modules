@@ -1,0 +1,14 @@
+{
+  "name": "@compsoul/modules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ESM UI modules with shared core utilities and plugin-based components.",
+  "scripts": {
+    "build": "npm run build:modal",
+    "build:modal": "esbuild modules/modal/index.js --bundle --minify --format=esm --outfile=dist/modal.min.js && copy modules\\modal\\style.css dist\\modal.css"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
