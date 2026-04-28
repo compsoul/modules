@@ -1,6 +1,6 @@
 // modal/plugins/load.js
 
-import { isFeatureEnabled } from "../../core/settings/features.js";
+import { isFeatureEnabled } from "../../core/index.js";
 
 export async function loadPlugins(features = {}) {
   const plugins = [];

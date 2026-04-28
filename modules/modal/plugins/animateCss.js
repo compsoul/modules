@@ -1,6 +1,6 @@
 ﻿// modal/plugins/animateCss.js
 
-import { getFeatureOptions, isFeatureEnabled } from "../../core/settings/features.js";
+import { getFeatureOptions, isFeatureEnabled } from "../../core/index.js";
 
 function waitForAnimationEnd(element, timeout = 1200) {
   return new Promise((resolve) => {

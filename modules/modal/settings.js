@@ -1,7 +1,6 @@
 // modal/settings.js
 
-import { merge } from "../core/settings/merge.js";
-import { resolveSettings } from "../core/settings/resolve.js";
+import { merge, resolveSettings } from "../core/index.js";
 import { defaults } from "./defaults.js";
 
 export function settings(options = {}, viewport = null, overrides = null) {

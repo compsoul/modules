@@ -1,6 +1,6 @@
 // modal/plugins/focusTrap.js
 
-import { getFeatureOptions, isFeatureEnabled } from "../../core/settings/features.js";
+import { getFeatureOptions, isFeatureEnabled } from "../../core/index.js";
 
 function getFocusable(container) {
   if (!(container instanceof Element)) return [];

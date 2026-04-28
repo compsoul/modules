@@ -1,12 +1,6 @@
 // modal/create.js
 
-import { createDebug } from "../core/debug.js";
-import { attach, detach } from "../core/dom/attach.js";
-import { bind } from "../core/dom/bind.js";
-import { build } from "../core/dom/build.js";
-import { delegate, event } from "../core/dom/event.js";
-import { createEmitter } from "../core/events/emitter.js";
-import { merge } from "../core/settings/merge.js";
+import { attach, bind, build, createDebug, createEmitter, delegate, detach, event, merge } from "../core/index.js";
 import { readDataOverrides } from "./data.js";
 import { defaults as modalDefaults } from "./defaults.js";
 import { loadPlugins } from "./plugins/load.js";

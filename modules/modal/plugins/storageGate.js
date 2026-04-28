@@ -1,6 +1,6 @@
 // modal/plugins/storageGate.js
 
-import { getFeatureRules, isFeatureEnabled } from "../../core/settings/features.js";
+import { getFeatureRules, isFeatureEnabled } from "../../core/index.js";
 
 export const storageGatePlugin = {
   name: "storageGate",

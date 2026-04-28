@@ -1,6 +1,6 @@
 // modal/data.js
 
-import { readDataOptions } from "../core/settings/data.js";
+import { readDataOptions } from "../core/index.js";
 import { defaults as modalDefaults } from "./defaults.js";
 
 export function readDataOverrides(options = {}, { namespace = "modal", debug = null } = {}) {

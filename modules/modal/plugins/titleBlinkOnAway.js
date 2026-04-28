@@ -1,6 +1,6 @@
 // modal/plugins/titleBlinkOnAway.js
 
-import { getFeatureOptions, isFeatureEnabled } from "../../core/settings/features.js";
+import { getFeatureOptions, isFeatureEnabled } from "../../core/index.js";
 
 export const titleBlinkOnAwayPlugin = {
   name: "titleBlinkOnAway",

@@ -1,8 +1,6 @@
 // modal/plugins/lockScroll.js
 
-import { lock, unlock } from "../../core/dom/scrollLock.js";
-import { addGap, removeGap } from "../../core/dom/scrollbarGap.js";
-import { getFeatureOptions, isFeatureEnabled } from "../../core/settings/features.js";
+import { addGap, getFeatureOptions, isFeatureEnabled, lock, removeGap, unlock } from "../../core/index.js";
 
 export const lockScrollPlugin = {
   name: "lockScroll",

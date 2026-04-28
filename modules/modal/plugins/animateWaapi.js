@@ -1,6 +1,6 @@
 // modal/plugins/animateWaapi.js
 
-import { getFeatureOptions, isFeatureEnabled } from "../../core/settings/features.js";
+import { getFeatureOptions, isFeatureEnabled } from "../../core/index.js";
 
 function canAnimate() {
   return typeof Element !== "undefined" && typeof Element.prototype?.animate === "function";

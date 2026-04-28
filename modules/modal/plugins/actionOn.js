@@ -1,6 +1,6 @@
 // modal/plugins/actionOn.js
 
-import { getFeatureRules, isFeatureEnabled } from "../../core/settings/features.js";
+import { getFeatureRules, isFeatureEnabled } from "../../core/index.js";
 
 export const actionOnPlugin = {
   name: "actionOn",

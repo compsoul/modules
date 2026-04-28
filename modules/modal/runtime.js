@@ -1,8 +1,6 @@
 // modal/runtime.js
 
-import { responsive } from "../core/runtime/responsive.js";
-import { createSync } from "../core/runtime/sync.js";
-import { viewport } from "../core/runtime/viewport.js";
+import { createSync, responsive, viewport } from "../core/index.js";
 
 function areSettingsEqual(left, right) {
   if (left === right) return true;
